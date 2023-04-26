@@ -1,0 +1,7 @@
+numpy
+astropy
+sunpy
+matplotlib
+pandas
+sphinx
+
