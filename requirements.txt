@@ -4,4 +4,4 @@ sunpy
 matplotlib
 pandas
 sphinx
-
+pytest

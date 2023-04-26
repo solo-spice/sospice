@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sospice"
+authors = [
+  { name="SPICE consortium", email="spice-github.ias@universite-paris-saclay.fr" },
+]
+description = "Python data analysis tools for Solar Orbiter/SPICE"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dynamic = ["version", "dependencies"]
+
+[tool.setuptools.dynamic]
+version = {attr = "sospice.VERSION"}
+dependencies = {file = ["requirements.txt"]}
+
+#[project.optional-dependencies]
+#docs = ["sphinx"]
+
+[project.urls]
+"Homepage" = "https://github.com/solo-spice/sospice/"
+"Bug Tracker" = "https://github.com/solo-spice/sospice/issues"
