@@ -5,3 +5,4 @@ matplotlib
 pandas
 sphinx
 pytest
+scipy
