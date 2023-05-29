@@ -5,4 +5,5 @@ matplotlib
 pandas
 sphinx
 pytest
+pytest-cov
 scipy
