@@ -10,16 +10,16 @@ from ..observation import Observation
 @pytest.fixture
 def header():
     return {
-        'SLIT_WID': 4.,
-        'NBIN3': 1,
-        'NBIN2': 2,
-        'XPOSURE': 10.,
-        'NAXIS3': 48,
-        'WAVEMIN': 769,
-        'WAVEMAX': 771,
-        'WAVEUNIT': -10,
-        'LEVEL': 'L2',
-        'RADCAL': 1000.
+        "SLIT_WID": 4.0,
+        "NBIN3": 1,
+        "NBIN2": 2,
+        "XPOSURE": 10.0,
+        "NAXIS3": 48,
+        "WAVEMIN": 769,
+        "WAVEMAX": 771,
+        "WAVEUNIT": -10,
+        "LEVEL": "L2",
+        "RADCAL": 1000.0,
     }
 
 
@@ -45,7 +45,7 @@ class TestObservation:
         for wavelength in expected:
             assert u.isclose(
                 observation.av_dark_current(wavelength * u.nm),
-                expected[wavelength] * u.ct / u.pix
+                expected[wavelength] * u.ct / u.pix,
             )
 
     def test_av_background(self, observation):
@@ -57,7 +57,7 @@ class TestObservation:
         for wavelength in expected:
             assert u.isclose(
                 observation.av_background(wavelength * u.nm),
-                expected[wavelength] * u.ct / u.pix
+                expected[wavelength] * u.ct / u.pix,
             )
 
     def test_read_noise_width(self, observation):
@@ -65,16 +65,15 @@ class TestObservation:
 
     def test_noise_effects_from_l2(self, observation):
         specrad_unit = u.mW / u.m**2 / u.sr / u.nm
-        av_constant_noise_level, sigma = observation.noise_effects_from_l2(0.1 * specrad_unit, 77*u.nm)
+        av_constant_noise_level, sigma = observation.noise_effects_from_l2(
+            0.1 * specrad_unit, 77 * u.nm
+        )
         expected = {
-            'Dark': 4.219004621945797,
-            'Background': 0.,
-            'Read': 9.758073580374356,
-            'Signal': 18.920887928424502,
-            'Total': 21.702995184996933,
+            "Dark": 4.219004621945797,
+            "Background": 0.0,
+            "Read": 9.758073580374356,
+            "Signal": 18.920887928424502,
+            "Total": 21.702995184996933,
         }
         for component in expected:
-            assert u.isclose(
-                sigma[component],
-                expected[component] * specrad_unit
-            )
+            assert u.isclose(sigma[component], expected[component] * specrad_unit)

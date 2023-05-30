@@ -12,7 +12,6 @@ def spice():
 
 
 class TestSpice:
-
     def test_init(self, spice):
         assert spice.read_noise == 6.9 * u.ct / u.pix
         assert spice.aeff_data is None
@@ -21,18 +20,21 @@ class TestSpice:
         # Expected values in mm² for wavelengths in nm
         expected = {
             20: np.nan,
-            77: 4.33579493, # Ne VIII (SW)
-            102.6: 9.57706423, # H Lyβ (LW)
-            52.1: 0.43514445, # Si XII (LW, 2nd order)
+            77: 4.33579493,  # Ne VIII (SW)
+            102.6: 9.57706423,  # H Lyβ (LW)
+            52.1: 0.43514445,  # Si XII (LW, 2nd order)
             200: np.nan,
         }
         for wavelength in expected:
             assert u.isclose(
                 spice.effective_area(wavelength * u.nm),
                 expected[wavelength] * u.mm**2,
-                equal_nan=True
+                equal_nan=True,
             )
-        assert u.allclose(spice.effective_area([50, 80, 100] * u.nm), [0.28686351, 5.50425673, 9.21953583] * u.mm**2)
+        assert u.allclose(
+            spice.effective_area([50, 80, 100] * u.nm),
+            [0.28686351, 5.50425673, 9.21953583] * u.mm**2,
+        )
         assert spice.aeff_data is not None
 
     def test_quantum_efficiency(self, spice):
@@ -44,18 +46,17 @@ class TestSpice:
         }
         for wavelength in expected:
             assert u.isclose(
-                spice.quantum_efficiency(wavelength * u.nm),
-                expected[wavelength]
+                spice.quantum_efficiency(wavelength * u.nm), expected[wavelength]
             )
 
     def test_which_detector(self, spice):
         # Expected values for wavelengths in nm
         expected = {
-            77: 'SW',
-            102.6: 'LW',
+            77: "SW",
+            102.6: "LW",
         }
         for wavelength in expected:
-            assert spice.which_detector(wavelength * u.nm) ==  expected[wavelength]
+            assert spice.which_detector(wavelength * u.nm) == expected[wavelength]
         # Expected None values
         expected_none = [70, 85, 106]
         for wavelength in expected_none:
@@ -71,8 +72,9 @@ class TestSpice:
         }
         for wavelength in expected:
             assert u.isclose(
-                spice.gain(wavelength * u.nm), expected[wavelength] * u.ct / u.ph,
-                equal_nan=True
+                spice.gain(wavelength * u.nm),
+                expected[wavelength] * u.ct / u.ph,
+                equal_nan=True,
             )
 
     def test_dark_current(self, spice):
@@ -85,8 +87,9 @@ class TestSpice:
         }
         for wavelength in expected:
             assert u.isclose(
-                spice.dark_current(wavelength * u.nm), expected[wavelength] *u.ct / u.s / u.pix,
-                equal_nan=True
+                spice.dark_current(wavelength * u.nm),
+                expected[wavelength] * u.ct / u.s / u.pix,
+                equal_nan=True,
             )
 
     def test_noise_factor(self, spice):
@@ -101,5 +104,5 @@ class TestSpice:
             assert u.isclose(
                 spice.noise_factor(wavelength * u.nm),
                 expected[wavelength],
-                equal_nan=True
+                equal_nan=True,
             )

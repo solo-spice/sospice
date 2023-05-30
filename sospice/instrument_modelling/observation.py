@@ -6,6 +6,7 @@ from .spice import Spice
 from .study import Study
 from ..util import rss
 
+
 @dataclass
 class Observation:
     instrument: Spice()
@@ -26,7 +27,7 @@ class Observation:
         return observation
 
     @u.quantity_input
-    def av_dark_current(self, wvl: u.Angstrom=None):
+    def av_dark_current(self, wvl: u.Angstrom = None):
         """
         Average dark current in DN per macro-pixel over exposure time
 
@@ -47,11 +48,15 @@ class Observation:
         """
         if wvl is None:
             wvl = self.study.av_wavelength
-        return (self.instrument.dark_current(wvl) * self.study.exp_time *
-                self.study.bin_x * self.study.bin_y).to(u.ct / u.pix)
+        return (
+            self.instrument.dark_current(wvl)
+            * self.study.exp_time
+            * self.study.bin_x
+            * self.study.bin_y
+        ).to(u.ct / u.pix)
 
     @u.quantity_input
-    def av_background(self, wvl: u.Angstrom=None):
+    def av_background(self, wvl: u.Angstrom = None):
         """
         Average background signal in DN per macro-pixel over exposure time
 
@@ -85,7 +90,7 @@ class Observation:
         return self.instrument.read_noise * np.sqrt(self.study.bin_x * self.study.bin_y)
 
     @u.quantity_input
-    def noise_effects(self, signal_mean: u.ct / u.pix, wvl: u.Angstrom):
+    def noise_effects(self, signal_mean: u.ct / u.pix, wvl: u.Angstrom = None):
         """
         Return total (measured) signal increase and standard deviation due to noises
 
@@ -93,7 +98,8 @@ class Observation:
         ----------
         signal_mean: Quantity
             Measured signal mean, in DN/pix, excluding expected signal increase
-            due to average dark current and background (so this is not exactly the measured signal).
+            due to average dark current and background (so this is not exactly
+            the measured signal).
         wvl: Quantity
             Wavelength (or array of wavelengths)
 
@@ -102,41 +108,56 @@ class Observation:
         float:
             Average contribution of noise to measured signal
         dict:
-            Noise standard deviations for the different components (and total uncertainty resulting from them)
+            Noise standard deviations for the different components (and total
+            uncertainty resulting from them)
 
-        Negative values of the signal are considered to be 0 for the purpose of computing the noise on the signal.
-        However, the total uncertainty is then set to |signal_mean| + RSS (other noises),
-        to ensure that the error bars are still compatible with expected fitted functions.
-        We suggest users to replace large negative values of the signal (e.g. < -3 * RSS(other noises)) by NaNs.
+        Negative values of the signal are considered to be 0 for the purpose of
+        computing the noise on the signal. However, the total uncertainty is
+        then set to |signal_mean| + RSS (other noises), to ensure that the
+        error bars are still compatible with expected fitted functions.
+        We suggest users to replace large negative values of the signal
+        (e.g. < -3 * RSS(other noises)) by NaNs.
 
         """
+        if wvl is None:
+            wvl = self.study.av_wavelength
         av_dark_current = self.av_dark_current()
         av_background = self.av_background()
         av_constant_noise_level = av_dark_current + av_background
-        wvl = self.study.av_wavelength
         sigma = dict()
         gain = self.instrument.gain(wvl)
-        sigma['Dark'] = np.sqrt(av_dark_current.value) * u.ct / u.pix
-        sigma['Background'] = np.sqrt(av_background * gain).value * u.ct / u.pix
-        sigma['Read'] = self.read_noise_width
+        sigma["Dark"] = np.sqrt(av_dark_current.value) * u.ct / u.pix
+        sigma["Background"] = np.sqrt(av_background * gain).value * u.ct / u.pix
+        sigma["Read"] = self.read_noise_width
         signal_mean_nonneg = np.maximum(signal_mean, 0)
-        sigma['Signal'] = np.sqrt(signal_mean_nonneg * gain).value * u.ct / u.pix
-        sigma['Signal'] *= self.instrument.noise_factor(wvl)
-        constant_noises = rss(np.array([
-            sigma['Dark'].value,
-            sigma['Background'].value,
-            sigma['Read'].value
-        ]))
-        sigma['Total'] = rss(np.array([
-            constant_noises * np.ones_like(signal_mean.value),
-            sigma['Signal'].value
-        ])) * sigma['Signal'].unit
-        where_neg = (signal_mean < 0)
-        sigma['Total'][where_neg] = -signal_mean[where_neg] + constant_noises * signal_mean.unit
+        sigma["Signal"] = np.sqrt(signal_mean_nonneg * gain).value * u.ct / u.pix
+        sigma["Signal"] *= self.instrument.noise_factor(wvl)
+        constant_noises = rss(
+            np.array(
+                [sigma["Dark"].value, sigma["Background"].value, sigma["Read"].value]
+            )
+        )
+        sigma["Total"] = (
+            rss(
+                np.array(
+                    [
+                        constant_noises * np.ones_like(signal_mean.value),
+                        sigma["Signal"].value,
+                    ]
+                )
+            )
+            * sigma["Signal"].unit
+        )
+        where_neg = signal_mean < 0
+        sigma["Total"][where_neg] = (
+            -signal_mean[where_neg] + constant_noises * signal_mean.unit
+        )
         return av_constant_noise_level, sigma
 
     @u.quantity_input
-    def noise_effects_from_l2(self, data: u.W / u.m ** 2 / u.sr / u.nm, wvl: u.Angstrom):
+    def noise_effects_from_l2(
+        self, data: u.W / u.m**2 / u.sr / u.nm, wvl: u.Angstrom
+    ):
         """
         Return total (measured) signal increase and standard deviation due to noises
 

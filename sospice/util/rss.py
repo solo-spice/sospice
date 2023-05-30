@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def rss(a, axis=None):
     """
     Root sum square of array elements
