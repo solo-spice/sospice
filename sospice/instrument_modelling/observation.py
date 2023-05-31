@@ -144,7 +144,8 @@ class Observation:
                         constant_noises * np.ones_like(signal_mean.value),
                         sigma["Signal"].value,
                     ]
-                )
+                ),
+                axis=0,
             )
             * sigma["Signal"].unit
         )
