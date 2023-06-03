@@ -28,3 +28,19 @@ dependencies = {file = ["requirements.txt"]}
 [project.urls]
 "Homepage" = "https://github.com/solo-spice/sospice/"
 "Bug Tracker" = "https://github.com/solo-spice/sospice/issues"
+
+[tool.black]
+include = '\.pyi?$'
+exclude = '''
+/(
+  | \.git
+  | \.github
+  | \.idea
+  | \.pytest_cache
+  | build
+  | dist
+  | docs
+  | htmlcov
+  | venv
+)/
+'''
