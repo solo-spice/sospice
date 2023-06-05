@@ -1,9 +1,14 @@
-numpy
 astropy
-sunpy
+black
+flake8
 matplotlib
+numpy
 pandas
-sphinx
+pre-commit
 pytest
 pytest-cov
 scipy
+setuptools>=45
+setuptools_scm[toml]>=6.2
+sphinx
+sunpy
