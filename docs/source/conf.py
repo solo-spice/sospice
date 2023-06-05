@@ -13,16 +13,20 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
+from datetime import datetime
+
+# from sospice import __version__
+from setuptools_scm import get_version
 
 
 # -- Project information -----------------------------------------------------
 
 project = "sospice"
-copyright = "2023, SPICE consortium"
+copyright = f"{datetime.now().year}, SPICE consortium"
 author = "SPICE consortium"
 
 # The full version, including alpha/beta/rc tags
-release = "0.01"
+release = get_version(root="../..", relative_to=__file__)
 
 
 # -- General configuration ---------------------------------------------------
@@ -30,7 +34,27 @@ release = "0.01"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = []
+extensions = [
+    "matplotlib.sphinxext.plot_directive",
+    # "sphinx_automodapi.automodapi",
+    # "sphinx_automodapi.smart_resolver",
+    # "sphinx_changelog",
+    # "sphinx_gallery.gen_gallery",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.coverage",
+    "sphinx.ext.doctest",
+    "sphinx.ext.inheritance_diagram",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.todo",
+    "sphinx.ext.viewcode",
+    # "sphinxext.opengraph",
+    # "sphinx_design",
+    # "sphinx_copybutton",
+    # "hoverxref.extension",
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -38,8 +62,26 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ["build", "htmlcov", "sospice.egg-info", "venv"]
 
+# -- Options for intersphinx extension ---------------------------------------
+intersphinx_mapping = {
+    "python": (
+        "https://docs.python.org/3/",
+        (None, "http://data.astropy.org/intersphinx/python3.inv"),
+    ),
+    "numpy": (
+        "https://docs.scipy.org/doc/numpy/",
+        (None, "http://data.astropy.org/intersphinx/numpy.inv"),
+    ),
+    "matplotlib": (
+        "https://matplotlib.org/",
+        (None, "http://data.astropy.org/intersphinx/matplotlib.inv"),
+    ),
+    "astropy": ("http://docs.astropy.org/en/stable/", None),
+    "sunpy": ("https://docs.sunpy.org/en/stable/", None),
+    "sunraster": ("https://docs.sunpy.org/projects/sunraster/en/stable/", None),
+}
 
 # -- Options for HTML output -------------------------------------------------
 

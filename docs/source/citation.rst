@@ -1,0 +1,1 @@
+.. include:: ../../sospice/CITATION.rst

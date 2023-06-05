@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -19,11 +19,13 @@ classifiers = [
 dynamic = ["version", "dependencies"]
 
 [tool.setuptools.dynamic]
-version = {attr = "sospice.VERSION"}
+version = {attr = "sospice.__version__"}
 dependencies = {file = ["requirements.txt"]}
 
 #[project.optional-dependencies]
 #docs = ["sphinx"]
+
+[tool.setuptools_scm]
 
 [project.urls]
 "Homepage" = "https://github.com/solo-spice/sospice/"
