@@ -1,4 +1,4 @@
-Cciting sospice
+Citing sospice
 ===============
 
 If you use ``sospice`` in your work, we would appreciate acknowledging
