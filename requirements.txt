@@ -7,6 +7,7 @@ pandas
 pre-commit
 pytest
 pytest-cov
+requests
 scipy
 setuptools>=45
 setuptools_scm[toml]>=6.2
