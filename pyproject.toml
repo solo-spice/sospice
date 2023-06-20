@@ -46,3 +46,10 @@ exclude = '''
   | venv
 )/
 '''
+
+[tool.coverage.run]
+omit = [
+    "*/tests/*",
+    "tests/*",
+    "__init__.py",
+]
