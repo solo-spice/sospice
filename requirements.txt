@@ -1,4 +1,4 @@
-astropy>=5.0
+astropy>=4.0
 black>=23.0
 flake8>=6.0
 matplotlib>=3.7.0
@@ -13,4 +13,4 @@ scipy>=1.10
 setuptools>=45
 setuptools_scm[toml]>=7.0
 Sphinx>=7.0
-sunpy>=5.0
+sunpy>=4.0
