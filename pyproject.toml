@@ -8,8 +8,8 @@ authors = [
   { name="SPICE consortium", email="spice-github.ias@universite-paris-saclay.fr" },
 ]
 description = "Python data analysis tools for Solar Orbiter/SPICE"
-readme = "README.md"
-requires-python = ">=3.7"
+readme = "README.rst"
+requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
@@ -21,7 +21,6 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Astronomy",
 ]
-
 dynamic = ["version", "dependencies"]
 
 [tool.setuptools.dynamic]
