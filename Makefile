@@ -8,3 +8,5 @@ pre-commit:
 	pre-commit
 show-version:
 	python -m setuptools_scm
+doc-html:
+	make -C docs html

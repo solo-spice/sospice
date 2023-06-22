@@ -36,6 +36,7 @@ release = get_version(root="../..", relative_to=__file__)
 # ones.
 extensions = [
     "matplotlib.sphinxext.plot_directive",
+    "numpydoc",
     # "sphinx_automodapi.automodapi",
     # "sphinx_automodapi.smart_resolver",
     # "sphinx_changelog",
@@ -55,6 +56,7 @@ extensions = [
     # "sphinx_copybutton",
     # "hoverxref.extension",
 ]
+
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
 
 # Add any paths that contain templates here, relative to this directory.
@@ -63,7 +65,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["build", "htmlcov", "sospice.egg-info", "venv"]
+exclude_patterns = ["build", "htmlcov", "sospice.egg-info", "venv", "tests"]
 
 # -- Options for intersphinx extension ---------------------------------------
 intersphinx_mapping = {

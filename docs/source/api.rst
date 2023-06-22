@@ -1,7 +1,7 @@
 API
 ===
 
-There should be an API documentation (generated from the code docstrings) here, but it seems that we have to update the Sphinx configuration for this.
+This API documentation is generated from the Python code docstrings (we still have to finalize the Sphinx configuration for this documentation to reflect all code documentation).
 
 .. autosummary::
    :toctree: _autosummary
