@@ -23,6 +23,11 @@ wiki <https://spice-wiki.ias.u-psud.fr/doku.php/data:data_analysis_manual>`__.
    -  ``spice_error``: Computation of uncertainties on data, coming from
       different noise components.
 
+- Catalog: ``catalog``
+
+   -  ``Catalog``: access and read catalog, find files in catalog.
+   -  ``Release```: find and access releases.
+
 -  Instrument modelling: ``instrument_modelling``
 
    -  ``Spice``: instrument calibration parameters, effective area,
@@ -37,7 +42,7 @@ Package philosophy
 
 We want ``sospice`` to be:
 
--  Convenient to install. It is installable by ``pip`` and it will be
+-  Convenient to install. It is installable by ``pip`` and it is
    published on `PyPI <https://pypi.org/>`__
 -  Useful, providing a single package for all SPICE-specific steps of
    your data analysis.

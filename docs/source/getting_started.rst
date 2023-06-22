@@ -1,7 +1,7 @@
 Getting Started
 ===============
 
-The stable version of ``sospice`` will be available through PyPI via ``pip``,
+The stable version of ``sospice`` is available through PyPI via ``pip``,
 
 .. code-block:: shell
 
