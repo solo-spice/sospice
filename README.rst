@@ -23,6 +23,10 @@ wiki <https://spice-wiki.ias.u-psud.fr/doku.php/data:data_analysis_manual>`__.
    -  ``spice_error``: Computation of uncertainties on data, coming from
       different noise components.
 
+- Catalog: ```catalog``
+
+   - ``Catalog``: read catalog and find files
+
 -  Instrument modelling: ``instrument_modelling``
 
    -  ``Spice``: instrument calibration parameters, effective area,
