@@ -163,5 +163,8 @@ cython_debug/
 # Editors backup files
 *~
 
+# Version written by setuptools_scm
+sospice/_version.py
+
 # Local files
 local/
