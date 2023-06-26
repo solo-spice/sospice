@@ -23,6 +23,9 @@ classifiers = [
 ]
 dynamic = ["version", "dependencies"]
 
+[tool.setuptools.packages.find]
+exclude = ["local"]
+
 [tool.setuptools.dynamic]
 version = {attr = "sospice.__version__"}
 dependencies = {file = ["requirements.txt"]}
@@ -31,6 +34,7 @@ dependencies = {file = ["requirements.txt"]}
 #docs = ["sphinx"]
 
 [tool.setuptools_scm]
+write_to = "sospice/_version.py"
 
 [project.urls]
 "Homepage" = "https://github.com/solo-spice/sospice/"
