@@ -2,9 +2,9 @@ build:
 	python3 -m build
 install:
 	python -m pip install .
-test:
+test: show-version
 	pytest --cov
-test-html:
+test-html: show-version
 	pytest --cov --cov-report html
 pre-commit:
 	pre-commit
