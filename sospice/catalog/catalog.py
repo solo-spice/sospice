@@ -87,7 +87,6 @@ class Catalog(pd.DataFrame):
         """
         Used cached catalog or download release catalog to astropy cache
         """
-        print("Enter cache release catalog")
         if self.release_tag is None:
             return
         if self.release_tag == "latest":
@@ -101,7 +100,6 @@ class Catalog(pd.DataFrame):
         """
         Check that the data_frame argument can be considered a valid SPICE catalog (or raise an exception)
         """
-        print(f"enter validate data frame {self.data_frame}")
         assert self.data_frame is not None
         if self.data_frame.empty:
             return True  # an empty data frame is valid
@@ -161,6 +159,7 @@ class Catalog(pd.DataFrame):
         )
         date_columns = ["DATE-BEG", "DATE", "TIMAQUTC"]
         for date_column in date_columns:
+            df.loc[df[date_column] == "MISSING", date_column] = "NaT"
             df[date_column] = pd.to_datetime(df[date_column], format="ISO8601")
         return df
 
