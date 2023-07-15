@@ -44,15 +44,15 @@ class Observation:
         TODO:
         * Should depend on detector temperature.
         * Actually non-Poissonian (need to look at real darks).
-        * Would depend on position (dark pixels) in L1
+        * Would depend on position (dark or hot pixels) in L1
         """
         if wvl is None:
             wvl = self.study.av_wavelength
         return (
             self.instrument.dark_current(wvl)
-            * self.study.exp_time
-            * self.study.bin_x
-            * self.study.bin_y
+            * self.study.exp_time  # noqa: W503
+            * self.study.bin_x  # noqa: W503
+            * self.study.bin_y  # noqa: W503
         ).to(u.ct / u.pix)
 
     @u.quantity_input
@@ -74,11 +74,11 @@ class Observation:
             wvl = self.study.av_wavelength
         return (
             self.instrument.background
-            * self.instrument.quantum_efficiency(wvl)
-            * self.study.exp_time
-            * self.study.bin_x
-            * self.study.bin_y
-            * self.instrument.gain(wvl)
+            * self.instrument.quantum_efficiency(wvl)  # noqa: W503
+            * self.study.exp_time  # noqa: W503
+            * self.study.bin_x  # noqa: W503
+            * self.study.bin_y  # noqa: W503
+            * self.instrument.gain(wvl)  # noqa: W503
         ).to(u.ct / u.pix)
 
     @property
@@ -146,8 +146,8 @@ class Observation:
                     ]
                 ),
                 axis=0,
-            )
-            * sigma["Signal"].unit
+            )  # noqa: W503
+            * sigma["Signal"].unit  # noqa: W503
         )
         where_neg = signal_mean < 0
         sigma["Total"][where_neg] = (
