@@ -26,7 +26,7 @@ def get_file_relative_path(cat_row):
     """
     date = cat_row["DATE-BEG"]
     return (
-        Path(f"level{cat_row.LEVEL[1]}")  # noqa: W503
+        Path(f"level{cat_row.LEVEL[1]}")
         / f"{date.year}"  # noqa: W503
         / f"{date.month:02}"  # noqa: W503
         / f"{date.day:02}"  # noqa: W503
@@ -159,6 +159,7 @@ class Catalog(pd.DataFrame):
         )
         date_columns = ["DATE-BEG", "DATE", "TIMAQUTC"]
         for date_column in date_columns:
+            df.loc[df[date_column] == "MISSING", date_column] = "NaT"
             df[date_column] = pd.to_datetime(df[date_column], format="ISO8601")
         return df
 
