@@ -53,7 +53,7 @@ class Catalog(pd.DataFrame):
 
     filename: str = None
     release_tag: str = None
-    data_frame: str = None
+    data_frame: pd.DataFrame = None
     update_cache: bool = False
 
     def __post_init__(self):
@@ -163,24 +163,109 @@ class Catalog(pd.DataFrame):
             df[date_column] = pd.to_datetime(df[date_column], format="ISO8601")
         return df
 
-    def find_file(self, date=None, level="L2"):
+    @classmethod
+    def build_query_from_keywords(cls, **kwargs):
         """
-        Find closest file to some observation data (DATE-BEG)
+        Build a query from the provided parameters: exact keyword matches
+
+        Parameters
+        ----------
+        kwargs: dict
+            Parameters and their values
+
+        Return
+        ------
+        str
+            Query string for `pandas.DataFrame.query()`
+
+        Notes:
+
+        * does not work for dates
+        * keywords are converted to upper case (FITS keywords)
+        * ignores keywords with value None
+        """
+        queries = list()
+        for key in kwargs:
+            value = kwargs[key]
+            if value is None:
+                continue
+            if isinstance(value, str):
+                query = f'{key.upper()} == "{kwargs[key]}"'
+            else:
+                query = f"{key.upper()} == {kwargs[key]}"
+            queries.append(query)
+        return " and ".join(queries)
+
+    def find_files_by_keywords(self, **kwargs):
+        """
+        Find files according to criteria on metadata: exact keyword matches
+
+        Parameters
+        ----------
+        kwargs: dict
+            Parameters and their values
+
+        Return
+        ------
+        Catalog
+            Matching files
+        """
+        if self.empty or not kwargs:
+            return self
+        query = Catalog.build_query_from_keywords(**kwargs)
+        if query != "":
+            df = self.query(query)
+            return Catalog(data_frame=df)
+        else:
+            return self
+
+    def find_files_by_date_range(self, date_min=None, date_max=None):
+        """
+        Find files in some date range.
+
+        Parameters
+        ----------
+        date_min:
+            Minimum date of a date range
+        date_max:
+            Maximum date of a date range
+
+        Return
+        ------
+        Catalog
+            Matching files
+        """
+        if self.empty:
+            return self
+        df = self
+        if date_min is not None:
+            if type(date_min) is str:
+                date_min = pd.Timestamp(date_min)
+            df = df[df["DATE-BEG"] >= date_min]
+        if date_max is not None:
+            if type(date_max) is str:
+                date_max = pd.Timestamp(date_max)
+            df = df[df["DATE-BEG"] <= date_max]
+        return Catalog(data_frame=df)
+
+    def find_file_closest_to_date(self, date, level="L2"):
+        """
+        Find file closest to some given date
 
         Parameters
         ----------
         date: datetime.datetime, pandas.Timestamp...
-            Target date
+            Date (compared to DATE-BEG)
         level: str
-            LEVEL to select (≥L1)
+            Data level
 
         Return
         ------
         pandas.Series
-            File with closest date
+            Matching file
         """
-        if self.empty or date is None:
-            return None
+        if date is None:
+            return pd.Series()
         if type(date) is str:
             date = pd.Timestamp(date)
         df = self[self.LEVEL == level]
@@ -188,3 +273,51 @@ class Catalog(pd.DataFrame):
         index = df.index.get_indexer([date], method="nearest")
         df.reset_index(inplace=True)
         return df.iloc[index[0]]
+
+    def find_files(
+        self, query=None, date_min=None, date_max=None, closest_to_date=None, **kwargs
+    ):
+        """
+        Find files according to different criteria on metadata.
+
+        Parameters
+        ----------
+        query: str
+            Generic pandas.DataFrame.query() string
+        date_min:
+            Minimum date of a date range
+        date_max:
+            Maximum date of a date range
+        closest_to_date: datetime.datetime, pandas.Timestamp...
+            Find the file closest to a date.
+        kwargs: dict
+            Other parameters and their values
+
+        Return
+        ------
+        pandas.DataFrame
+            Matching files
+
+        Notes:
+
+        * Filtering is done by keyword exact match (LEVEL, SOOPNAME, MISOSTDU...),
+          then using the generic query string, then by date range, then by closest date.
+        * Keywords are converted to upper case (FITS keywords), so they can be passed as lowercase arguments
+        * Selects LEVEL="L2" by default; if you want all levels, please specify LEVEL=None
+        * Date arguments are compared to DATE-BEG.
+        """
+        if self.empty:
+            return self
+        if "LEVEL" not in [k.upper() for k in kwargs.keys()]:
+            kwargs["LEVEL"] = "L2"
+        df = self.find_files_by_keywords(**kwargs)
+        if query is not None:
+            df = Catalog(data_frame=df.query(query))
+        df = df.find_files_by_date_range(date_min, date_max)
+        if closest_to_date is not None:
+            df = (
+                df.find_file_closest_to_date(closest_to_date, level=kwargs["LEVEL"])
+                .to_frame()
+                .T
+            )
+        return df

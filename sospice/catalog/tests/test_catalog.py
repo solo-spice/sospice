@@ -107,13 +107,51 @@ class TestCatalog:
         assert len(catalog_df.columns) == 36
         assert catalog_df.iloc[1].NAXIS2 == 101
 
-    def test_find_file(self, catalog2):
+    def test_find_files_by_keywords(self, catalog2):
+        result = catalog2.find_files_by_keywords()
+        assert len(result) == 15643
+        result = catalog2.find_files_by_keywords(level=None)
+        assert len(result) == 15643
+        result = catalog2.find_files_by_keywords(level="L2")
+        assert len(result) == 7756
+        result = catalog2.find_files_by_keywords(level="L2", nbin3=2)
+        assert len(result) == 201
+
+    def test_find_files_by_date_range(self, catalog2):
+        result = Catalog().find_files_by_date_range()
+        assert result.empty
+        result = catalog2.find_files_by_date_range()
+        assert len(result) == 15643
+        result = catalog2.find_files_by_date_range(date_min="2022-01-01")
+        assert len(result) == 14039
+        assert result["DATE-BEG"].min() > pd.Timestamp("2022-01-01")
+        result = catalog2.find_files_by_date_range(
+            date_min="2022-01-01", date_max="2022-03-01"
+        )
+        assert len(result) == 1711
+        assert result["DATE-BEG"].max() < pd.Timestamp("2022-03-01")
+
+    def test_find_file_closest_to_date(self, catalog2):
         expected_filename = "solo_L2_spice-n-exp_20211204T120022_V02_83886365-000.fits"
-        result = catalog2.find_file(pd.Timestamp("2021-10-10"))
+        result = catalog2.find_file_closest_to_date(pd.Timestamp("2021-10-10"))
         assert result.FILENAME == expected_filename
-        result = catalog2.find_file(datetime(2021, 10, 10))
+        result = catalog2.find_file_closest_to_date(datetime(2021, 10, 10))
         assert result.FILENAME == expected_filename
-        result = catalog2.find_file("2021-10-10")
+        result = catalog2.find_file_closest_to_date("2021-10-10")
         assert result.FILENAME == expected_filename
-        result = catalog2.find_file(None)
-        assert result is None
+        result = catalog2.find_file_closest_to_date(None)
+        assert result.empty
+
+    def test_find_files(self, catalog2):
+        result = Catalog().find_files()
+        assert result.empty
+        result = catalog2.find_files()
+        assert len(result) == 7756
+        result = catalog2.find_files(level=None)
+        assert len(result) == 15643
+        result = catalog2.find_files(query="NBIN3==2")
+        assert len(result) == 201
+        expected_filename = "solo_L2_spice-n-exp_20211204T120022_V02_83886365-000.fits"
+        result = catalog2.find_files(closest_to_date="2021-10-10")
+        assert len(result) == 1
+        assert result.iloc[0].FILENAME == expected_filename
