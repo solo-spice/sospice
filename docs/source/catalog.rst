@@ -36,7 +36,9 @@ Data release catalogs are accessed automatically online from their release tag. 
    from sospice import Catalog
    catalog = Catalog(release_tag='2.0')
 
-There are various functions to search files in a catalog, by keyword (including with a generic query), the most generic is ``find_files()``:
+It is also possible to read a local file containing a SPICE catalog.
+
+There are several functions to search files in a catalog, by keyword (including generic queries on keywords), by date range, or to find the closest file to a given date. The most generic search function is ``find_files()``, e.g.:
 
 .. code-block:: python
 

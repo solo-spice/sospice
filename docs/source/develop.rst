@@ -48,11 +48,11 @@ create a new environment for ``sospice`` development,
 
 .. code-block:: shell
 
-    conda create --name ``sospice``-dev pip
-    conda activate ``sospice``-dev
+    conda create --name sospice-dev pip
+    conda activate sospice-dev
 
 If you're using another python installation, you can also use `virtual environments <https://docs.python.org/3/tutorial/venv.html>`__,
-for example with ``venv```:
+for example with ``venv``:
 
 .. code-block:: shell
 
@@ -68,40 +68,7 @@ Next, install the needed dependencies,
 
 This includes all of the dependencies for the package as well as ``pytest`` for running tests and ``sphinx`` for building the docs.
 
-To make sure everything is working alright, you can run the tests,
-
-.. code-block:: shell
-
-    pytest
-
-See :ref:`tests` for more details regarding running the tests.
-
-Making a contribution
----------------------
-
-If you want to add a feature or bugfix to ``sospice``, start by first making sure the main branch of your fork is up to date with the main branch of the main repository (see above, this will help to prevent potential file conflicts).
-Next, create a new branch and switch to it,
-
-.. code:: shell
-
-    git checkout -b my-new-feature
-
-After you've made your changes, commit and push them up to GitHub,
-
-.. code:: shell
-
-    git add changed_file_1.py changed_file_2.py
-    git commit -m "short description of my change"
-    git push origin my-new-feature
-
-Once you see the changes in GitHub, create a `pull request <https://docs.github.com/en/pull-requests>`__
-against the main ``sospice`` repository.
-Others will likely have comments and suggestions regarding your proposed changes.
-You can make these changes using the instructions listed above.
-
-At least one other ``sospice`` developer must approve your changes before the code can be merged.
-Additionally, all automated tests should pass and all conversations should be resolved.
-Once these steps are complete, the code can be merged and you can delete  your branch ``my-new-feature``.
+To make sure everything is working alright, you can run the tests; see :ref:`tests` for more details regarding running the tests.
 
 .. _tests:
 
@@ -125,11 +92,54 @@ You can check which lines are covered by tests by running,
 
     make test-html
 
-and then opening the file ``htmlcov/index.html`` in a web browser.
+and then opening the file ``./htmlcov/index.html`` in a web browser.
 
 Tests should be added to the directory in the appropriate subpackage, e.g. for ``calibrate``, the tests should be placed in ``calibrate/tests``.
 Your tests can be added to an existing file or placed in a new file following the naming convention ``test_*.py``.
 This organization allows the tests to be automatically discovered by pytest.
+
+
+Making a contribution
+---------------------
+
+If you want to add a feature or bugfix to ``sospice``, start by first switching to the develop branch of your fork, and making sure it is up to date with the develop branch of the main repository (this will help to prevent potential file conflicts).
+
+.. code:: shell
+
+    git switch develop
+    git pull upstream develop
+
+Next, create a new branch and switch to it,
+
+.. code:: shell
+
+    git checkout -b my-new-feature
+
+Your changes should include tests for your new feature (see :ref:`tests`), so that the code coverage of the tests does not decrease, and all tests should pass.
+After you have made your changes, commit them,
+
+.. code:: shell
+
+    git add changed_file_1.py changed_file_2.py
+    git commit -m "short description of my change"
+
+The commit step will run "pre-commit" actions, with additional tests and code reformatting; please review these changes and re-commit them if necessary.
+
+You can then push changes to GitHub:
+
+.. code:: shell
+
+    git push origin my-new-feature
+
+Once you see the changes in GitHub, create a `pull request <https://docs.github.com/en/pull-requests>`__
+against the main ``sospice`` repository.
+Others will likely have comments and suggestions regarding your proposed changes.
+You can make these changes using the instructions listed above.
+
+At least one other ``sospice`` developer must approve your changes before the code can be merged.
+Additionally, all automated tests should pass and all conversations should be resolved.
+Once these steps are complete, the code can be merged and you can delete  your branch ``my-new-feature``.
+
 
 
 Documentation
@@ -141,8 +151,7 @@ You can build and test the documentation locally by running,
 
 .. code:: shell
 
-    cd docs
-    make html
+    make doc-html
 
 This will run Sphinx on the restructured text files in order to create the HTML version of the documentation.
 The built documentation, in HTML format, is in ``docs/_build/html``.
