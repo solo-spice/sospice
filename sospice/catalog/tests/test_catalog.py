@@ -3,7 +3,7 @@ from datetime import datetime
 import pandas as pd
 
 
-from ..catalog import Catalog, get_file_relative_path
+from ..catalog import Catalog
 
 
 @pytest.fixture
@@ -70,11 +70,6 @@ def catalog_df():
         }
     )
     return Catalog(data_frame=df)
-
-
-def test_get_file_relative_path(catalog_df):
-    path = get_file_relative_path(catalog_df.iloc[0])
-    assert path.as_posix() == "level2/2023/02/01"
 
 
 class TestCatalog:

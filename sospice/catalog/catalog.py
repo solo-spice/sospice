@@ -5,32 +5,7 @@ from pathlib import Path
 from astropy.utils.data import download_file
 
 from .release import Release
-
-
-def get_file_relative_path(cat_row):
-    """
-    Get file relative path for a given catalog entry
-
-    Parameters
-    ----------
-    cat_row: pandas.Series
-        SPICE catalog entry
-
-    Return
-    ------
-    pathlib.PosixPath
-        File path, relative to the "fits" directory of the file archive:
-        leveln/yyyy/mm/dd
-
-    Requires a DATE-BEG header (so does not work with L0 files).
-    """
-    date = cat_row["DATE-BEG"]
-    return (
-        Path(f"level{cat_row.LEVEL[1]}")
-        / f"{date.year}"  # noqa: W503
-        / f"{date.month:02}"  # noqa: W503
-        / f"{date.day:02}"  # noqa: W503
-    )
+from .file import required_columns
 
 
 @dataclass
@@ -103,43 +78,6 @@ class Catalog(pd.DataFrame):
         assert self.data_frame is not None
         if self.data_frame.empty:
             return True  # an empty data frame is valid
-        required_columns = {
-            "NAXIS1",
-            "NAXIS2",
-            "NAXIS3",
-            "NAXIS4",
-            "OBT_BEG",
-            "LEVEL",
-            "FILENAME",
-            "DATE-BEG",
-            "SPIOBSID",
-            "RASTERNO",
-            "STUDYTYP",
-            "MISOSTUD",
-            "XPOSURE",
-            "CRVAL1",
-            "CDELT1",
-            "CRVAL2",
-            "CDELT2",
-            "STP",
-            "DSUN_AU",
-            "CROTA",
-            "OBS_ID",
-            "SOOPNAME",
-            "SOOPTYPE",
-            "NWIN",
-            "DARKMAP",
-            "COMPLETE",
-            "SLIT_WID",
-            "DATE",
-            "PARENT",
-            "HGLT_OBS",
-            "HGLN_OBS",
-            "PRSTEP1",
-            "PRPROC1",
-            "PRPVER1",
-            "PRPARA1",
-        }
         assert required_columns.issubset(self.data_frame.columns)
 
     def read_catalog(self):
