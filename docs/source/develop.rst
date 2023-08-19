@@ -89,7 +89,7 @@ You can check which lines are covered by tests by running,
 
 .. code:: shell
 
-    make test-html
+    make test-htmlcov
 
 and then opening the file ``./htmlcov/index.html`` in a web browser.
 
