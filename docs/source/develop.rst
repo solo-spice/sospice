@@ -4,7 +4,7 @@
 Contributing
 ============
 
-You can contribute to ``sospice`` by writing code, but also writing documentation, tests, or even giving feedback about the project.
+You can contribute to ``sospice`` by writing code, but also by writing documentation or tests, or even by giving feedback about the project.
 
 Issue Tracking
 --------------
@@ -21,20 +21,20 @@ Creating a fork
 If you would like to contribute to ``sospice``, you will first need to create a `fork <https://docs.github.com/en/get-started/quickstart/fork-a-repo>`__
 of the main ``sospice`` repository under your GitHub username.
 
-Next, clone your fork of ``sospice`` to your local machine,
+Next, clone your fork of ``sospice`` to your local machine:
 
 .. code:: shell
 
     git clone https://github.com/<your_username>/sospice.git
     cd sospice
 
-Now add the main ``sospice`` repository as an upstream repository,
+Now add the main ``sospice`` repository as an upstream repository:
 
 .. code:: shell
 
     git remote add upstream https://github.com/solo-spice/sospice.git
 
-You can now keep your fork up to date with main repository by running,
+You can now keep your fork up to date with main repository by running
 
 .. code:: shell
 
@@ -44,22 +44,22 @@ Installation
 -------------
 
 If you're using the `Miniconda Python distribution <https://docs.conda.io/en/latest/miniconda.html>`__,
-create a new environment for ``sospice`` development,
+create a new environment for ``sospice`` development:
 
 .. code-block:: shell
 
-    conda create --name ``sospice``-dev pip
-    conda activate ``sospice``-dev
+    conda create --name sospice-dev pip
+    conda activate sospice-dev
 
 If you're using another python installation, you can also use `virtual environments <https://docs.python.org/3/tutorial/venv.html>`__,
-for example with ``venv```:
+for example with ``venv``:
 
 .. code-block:: shell
 
     python -m venv venv
     . venv/bin/activate
 
-Next, install the needed dependencies,
+Next, install the needed dependencies:
 
 .. code-block:: shell
 
@@ -68,48 +68,14 @@ Next, install the needed dependencies,
 
 This includes all of the dependencies for the package as well as ``pytest`` for running tests and ``sphinx`` for building the docs.
 
-To make sure everything is working alright, you can run the tests,
-
-.. code-block:: shell
-
-    pytest
-
-See :ref:`tests` for more details regarding running the tests.
-
-Making a contribution
----------------------
-
-If you want to add a feature or bugfix to ``sospice``, start by first making sure the main branch of your fork is up to date with the main branch of the main repository (see above, this will help to prevent potential file conflicts).
-Next, create a new branch and switch to it,
-
-.. code:: shell
-
-    git checkout -b my-new-feature
-
-After you've made your changes, commit and push them up to GitHub,
-
-.. code:: shell
-
-    git add changed_file_1.py changed_file_2.py
-    git commit -m "short description of my change"
-    git push origin my-new-feature
-
-Once you see the changes in GitHub, create a `pull request <https://docs.github.com/en/pull-requests>`__
-against the main ``sospice`` repository.
-Others will likely have comments and suggestions regarding your proposed changes.
-You can make these changes using the instructions listed above.
-
-At least one other ``sospice`` developer must approve your changes before the code can be merged.
-Additionally, all automated tests should pass and all conversations should be resolved.
-Once these steps are complete, the code can be merged and you can delete  your branch ``my-new-feature``.
+To make sure everything is working alright, you can run the tests; see :ref:`tests` for more details regarding running the tests.
 
 .. _tests:
 
 Testing
 -------
 
-Before committing any changes, you should ensure that the all of the tests pass locally.
-To run the tests,
+To run the tests:
 
 .. code:: shell
 
@@ -123,26 +89,64 @@ You can check which lines are covered by tests by running,
 
 .. code:: shell
 
-    make test-html
+    make test-htmlcov
 
-and then opening the file ``htmlcov/index.html`` in a web browser.
+and then opening the file ``./htmlcov/index.html`` in a web browser.
 
 Tests should be added to the directory in the appropriate subpackage, e.g. for ``calibrate``, the tests should be placed in ``calibrate/tests``.
 Your tests can be added to an existing file or placed in a new file following the naming convention ``test_*.py``.
 This organization allows the tests to be automatically discovered by pytest.
 
+Making a contribution
+---------------------
+
+If you want to add a feature or bugfix to ``sospice``, start by first switching to the develop branch of your fork, and making sure it is up to date with the develop branch of the main repository (this will help to prevent potential file conflicts).
+
+.. code:: shell
+
+    git switch develop
+    git pull upstream develop
+
+Next, create a new branch and switch to it:
+
+.. code:: shell
+
+    git checkout -b my-new-feature
+
+Your changes should include tests for your new feature (see :ref:`tests`), so that the code coverage of the tests does not decrease, and all tests should pass. After you have made your changes, commit them,
+
+.. code:: shell
+
+    git add changed_file_1.py changed_file_2.py
+    git commit -m "short description of my change"
+
+The commit step will run “pre-commit” actions, with additional checks and code reformatting; please review these changes and re-commit them if necessary.
+
+You can then push changes to GitHub:
+
+.. code:: shell
+
+    git push origin my-new-feature
+
+Once you see the changes in GitHub, create a `pull request <https://docs.github.com/en/pull-requests>`__
+against the main ``sospice`` repository.
+Others will likely have comments and suggestions regarding your proposed changes.
+You can make these changes using the instructions listed above.
+
+At least another ``sospice`` developer must approve your changes before the code can be merged.
+Additionally, all automated tests should pass and all conversations should be resolved.
+Once these steps are complete, the code can be merged and you can delete  your branch ``my-new-feature``.
 
 Documentation
 -------------
 
 All documentation is written in `reStructuredText <https://docutils.sourceforge.io/rst.html>`__ and rendered using `Sphinx <https://www.sphinx-doc.org/en/master/>`__.
 Documentation strings are automatically pulled from all modules, functions and classes to create the API documentation (not working yet).
-You can build and test the documentation locally by running,
+You can build and test the documentation locally by running
 
 .. code:: shell
 
-    cd docs
-    make html
+    make doc-html
 
 This will run Sphinx on the restructured text files in order to create the HTML version of the documentation.
 The built documentation, in HTML format, is in ``docs/_build/html``.

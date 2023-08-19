@@ -2,9 +2,11 @@ build:
 	python3 -m build
 install:
 	python -m pip install .
+install-editable:
+	python -m pip install -e .
 test: show-version
 	pytest --cov
-test-html: show-version
+test-htmlcov: show-version
 	pytest --cov --cov-report html
 pre-commit:
 	pre-commit

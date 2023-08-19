@@ -25,6 +25,7 @@ wiki <https://spice-wiki.ias.u-psud.fr/doku.php/data:data_analysis_manual>`__.
    :maxdepth: 2
 
    getting_started
+   catalog
    citation
    api
    develop
