@@ -42,8 +42,12 @@ There are several functions to search files in a catalog, by keyword (including 
 
 .. code-block:: python
 
+   # Files with some constraints on headers
    result = catalog.find_files(query="LEVEL=='L2' & NAXIS1 < 100 & 600 < CRVAL1 < 700")
+   # Closest file to some date, for a given SOOP
    result = catalog.find_files(soopname='L_SMALL_HRES_HCAD_Slow-Wind-Connection', closest_to_date='2022-03-21')
+   # All files for a SOOP, in some time range
+   result = catalog.find_files(soopname='L_SMALL_HRES_HCAD_Slow-Wind-Connection', date_min='2022-03-01', date_max='2022-04-01')
 
 The ``Catalog`` class derives from the ``pandas.DataFrame`` class, and so benefits from the ``pandas`` library functionalities.
 
