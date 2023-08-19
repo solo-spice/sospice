@@ -158,7 +158,7 @@ class FileMetadata:
 
         Parameters
         ----------
-        base_dir: Path
+        base_dir: Path or str
             Base directory to download file to
         base_url: str
             Base URL for file
@@ -177,10 +177,10 @@ class FileMetadata:
         """
         url = self.get_file_url(base_url=base_url, release=release)
         if keep_tree:
-            destination = base_dir / self.metadata.FILE_PATH
+            destination = Path(base_dir) / self.metadata.FILE_PATH
             destination.mkdir(parents=True, exist_ok=True)
         else:
-            destination = base_dir
+            destination = Path(base_dir)
         do_download = False
         if downloader is None:
             downloader = Downloader(overwrite=False)
