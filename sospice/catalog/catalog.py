@@ -5,7 +5,7 @@ from pathlib import Path
 from astropy.utils.data import download_file
 
 from .release import Release
-from .file import required_columns
+from .file_metadata import required_columns
 
 
 @dataclass
