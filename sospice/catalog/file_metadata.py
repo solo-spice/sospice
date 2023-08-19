@@ -90,7 +90,11 @@ class FileMetadata:
         str
             File URL
 
-        Note: there is no guarantee that the URL corresponds to an existing location
+        Notes:
+
+        * There is no guarantee that the URL corresponds to an existing location
+        * The base URL can be a path on disk, but paths are built using "/"
+        and this might not work on all operating systems.
         """
         if not base_url.endswith("/"):
             base_url += "/"
