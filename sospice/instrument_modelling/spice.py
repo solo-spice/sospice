@@ -7,10 +7,9 @@ import astropy.units as u
 
 @dataclass
 class Spice:
-    # These value the values used in Huang et al. 2023
-    # (doi:10.1051/0004-6361/202345988 TBC)
-    # which are supposed to be the latest values presented by RAL
-    # astropy.units.ct (counts) is used for DNs
+    # These values (Huang et al. 2023, doi:10.1051/0004-6361/202345988)
+    # are supposed to be the latest values presented by RAL.
+    # `astropy.units.ct` (counts) is used for DNs
     read_noise = 6.9 * u.ct / u.pix
     background = 0.0 * u.ph / u.s / u.pix  # 1.0 in SPICE-RAL-RP-0002
     pix_x = 1.0 * u.arcsec / u.pix  # not used
