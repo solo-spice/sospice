@@ -1,20 +1,16 @@
+# sospice itself is needed for Sphinx autosummary
+.
+# Requirements for building documentation on readthedocs.org
 astropy>=4.0
-black>=23.0
 build>=0.9.0
-flake8>=6.0
 matplotlib>=3.7.0
 numpy>=1.24.0
 numpydoc>=1.4
 pandas>=2.0
 parfive>=2.0
-pre-commit>=3.0
-pytest>=7.0
-pytest-cov>=4.0
 requests>=2.30
 scipy>=1.10
-setuptools>=45
 setuptools_scm[toml]>=7.0
 Sphinx>=6.2,<7.0
 sphinx-rtd-theme>=1.2.0
 sunpy>=4.0
-twine>=4.0
