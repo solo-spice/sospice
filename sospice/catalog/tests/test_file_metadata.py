@@ -31,6 +31,7 @@ class TestFileMetadata:
             + filename  # noqa: W503
         )
         assert file_metadata.get_file_url(release=release2) == expected
+        assert file_metadata.get_file_url(release="2.0") == expected
         expected = "http://soar.esac.esa.int/soar-sl-tap/data?retrieval_type=ALL_PRODUCTS&QUERY="
         expected += f"SELECT+filepath,filename+FROM+soar.v_sc_repository_file+WHERE+filename='{filename}'"
         assert file_metadata.get_file_url() == expected
