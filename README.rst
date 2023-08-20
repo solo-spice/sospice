@@ -15,6 +15,7 @@ package is in its early stages of development. Please see the
 `issues <https://github.com/solo-spice/sospice/issues>`__ to see how you
 can contribute.
 
+Documentation for this package is available on `Read the Docs <https://sospice.readthedocs.io/en/latest/>`__.
 A generic SPICE data analysis user’s manual (including Python and IDL
 tips) is available `on the IAS
 wiki <https://spice-wiki.ias.u-psud.fr/doku.php/data:data_analysis_manual>`__.
@@ -30,7 +31,8 @@ wiki <https://spice-wiki.ias.u-psud.fr/doku.php/data:data_analysis_manual>`__.
 - Catalog: ``catalog``
 
    -  ``Catalog``: access and read catalog, find files in catalog.
-   -  ``Release```: find and access releases.
+   -  ``Release``: find and access releases.
+   -  ``FileMetadata``: file metadata and download.
 
 -  Instrument modelling: ``instrument_modelling``
 
