@@ -1,2 +1,4 @@
 # Requirements for building documentation on readthedocs.org
+matplotlib>=3.7.0
 setuptools_scm[toml]>=7.0
+Sphinx>=7.0
