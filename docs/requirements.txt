@@ -1,0 +1,2 @@
+# Requirements for building documentation on readthedocs.org
+setuptools_scm[toml]>=7.0

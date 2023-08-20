@@ -1,6 +1,10 @@
 sospice: Python data analysis tools for Solar Orbiter/SPICE
 ===========================================================
 
+.. image:: https://readthedocs.org/projects/sospice/badge/?version=latest
+    :target: https://sospice.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 `SPICE <https://spice.ias.u-psud.fr/>`__ is an extreme-UV imaging
 spectrometer on board the `Solar
 Orbiter <http://sci.esa.int/solar-orbiter/>`__ mission.
