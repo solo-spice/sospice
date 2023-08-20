@@ -5,9 +5,9 @@ This API documentation is generated from the Python code docstrings (we still ha
 
 .. autosummary::
    :toctree: _autosummary
+   :template: custom-module-template.rst
    :recursive:
 
-   sospice
    sospice.spice_error
    sospice.Release
    sospice.Catalog
