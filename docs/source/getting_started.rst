@@ -1,4 +1,4 @@
-Getting Started
+Getting started
 ===============
 
 The stable version of ``sospice`` is available through PyPI via ``pip``,
