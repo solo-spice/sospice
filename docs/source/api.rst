@@ -8,3 +8,7 @@ This API documentation is generated from the Python code docstrings (we still ha
    :recursive:
 
    sospice
+   sospice.spice_error
+   sospice.Release
+   sospice.Catalog
+   sospice.FileMetadata
