@@ -6,6 +6,8 @@ import pandas as pd
 from astropy.utils.data import download_file
 from parfive import Downloader
 
+from .release import Release
+
 required_columns = {
     "NAXIS1",
     "NAXIS2",
@@ -108,8 +110,8 @@ class FileMetadata:
         ----------
         base_url: str
             Base URL for file
-        release: Release
-            Release to download file from
+        release: Release or str
+            Release to download file from. This can be a Release object, or a string for the release tag.
 
         Return
         ------
@@ -117,6 +119,8 @@ class FileMetadata:
             File URL
         """
         if release is not None:
+            if type(release) is str:
+                release = Release(release)
             url = self._get_file_url_from_base_url(release.url)
         elif base_url is not None:
             url = self._get_file_url_from_base_url(base_url)
@@ -136,7 +140,7 @@ class FileMetadata:
         ----------
         base_url: str
             Base URL for file
-        release: Release
+        release: Release or str
             Release to download file from
         update: bool
             Whether to update the cached file
@@ -166,7 +170,7 @@ class FileMetadata:
             Base directory to download file to
         base_url: str
             Base URL for file
-        release: Release
+        release: Release or str
             Release to download file from
         keep_tree: bool
             Keep tree directory structure (by level and date)
