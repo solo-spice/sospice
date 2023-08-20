@@ -1,9 +1,18 @@
 sospice: Python data analysis tools for Solar Orbiter/SPICE
 ===========================================================
 
-.. image:: https://readthedocs.org/projects/sospice/badge/?version=latest
+|Latest version| |Docs| |python| |CI|
+
+.. |Latest version| image:: https://img.shields.io/pypi/v/sospice.svg
+   :target: https://pypi.org/project/sospice/
+   :alt: Latest version on PyPI
+.. |Docs| image:: https://readthedocs.org/projects/sospice/badge/?version=latest
     :target: https://sospice.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+.. |python| image:: https://img.shields.io/pypi/pyversions/sunpy
+   :alt: PyPI - Python Version
+.. |CI| image:: https://github.com/solo-spice/sospice/actions/workflows/python-package.yml/badge.svg?branch=main
+   :target: https://github.com/solo-spice/sospice/actions/workflows/python-package.yml
 
 `SPICE <https://spice.ias.u-psud.fr/>`__ is an extreme-UV imaging
 spectrometer on board the `Solar
