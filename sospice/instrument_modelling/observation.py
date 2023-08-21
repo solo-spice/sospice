@@ -126,9 +126,9 @@ class Observation:
         av_noise_contribution = av_dark_current + av_background
         sigma = dict()
         gain = self.instrument.gain(wvl)
-        sigma["Dark"] = np.sqrt(av_dark_current.value) * u.ct / u.pix
+        sigma["Dark"] = np.sqrt(av_dark_current.value) * np.sqrt(2) * u.ct / u.pix
         sigma["Background"] = np.sqrt(av_background * gain).value * u.ct / u.pix
-        sigma["Read"] = self.read_noise_width
+        sigma["Read"] = self.read_noise_width * np.sqrt(2)
         signal_mean_nonneg = np.maximum(signal_mean, 0)
         sigma["Signal"] = np.sqrt(signal_mean_nonneg * gain).value * u.ct / u.pix
         sigma["Signal"] *= self.instrument.noise_factor(wvl)
