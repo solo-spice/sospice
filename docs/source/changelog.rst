@@ -1,12 +1,11 @@
-.. _changelog-ref:
+.. _changelog:
 
 *********
 Changelog
 *********
 
-This page will contain a change log.
+This page contains a change log, generated for package releases.
+The corresponding issues and pull requests can be found `on
+Github <https://github.com/solo-spice/sospice/>`__
 
-.. .. changelog::
-..    :towncrier: ../
-..    :towncrier-skip-if-empty:
-..    :changelog_file: ../CHANGELOG.rst
+.. include:: ../../CHANGELOG.rst
