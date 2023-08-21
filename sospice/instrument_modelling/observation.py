@@ -123,7 +123,7 @@ class Observation:
             wvl = self.study.av_wavelength
         av_dark_current = self.av_dark_current()
         av_background = self.av_background()
-        av_constant_noise_level = av_dark_current + av_background
+        av_noise_contribution = av_dark_current + av_background
         sigma = dict()
         gain = self.instrument.gain(wvl)
         sigma["Dark"] = np.sqrt(av_dark_current.value) * u.ct / u.pix
@@ -153,7 +153,7 @@ class Observation:
         sigma["Total"][where_neg] = (
             -signal_mean[where_neg] + constant_noises * signal_mean.unit
         )
-        return av_constant_noise_level, sigma
+        return av_noise_contribution, sigma
 
     @u.quantity_input
     def noise_effects_from_l2(
@@ -176,8 +176,8 @@ class Observation:
             Noise standard deviations for the different components (and total)
         """
         data_dn = data * self.study.radcal / u.pix
-        av_constant_noise_level, sigma = self.noise_effects(data_dn, wvl)
-        av_constant_noise_level /= self.study.radcal / u.pix
+        av_noise_contribution, sigma = self.noise_effects(data_dn, wvl)
+        av_noise_contribution /= self.study.radcal / u.pix
         for component in sigma:
             sigma[component] /= self.study.radcal / u.pix
-        return av_constant_noise_level, sigma
+        return av_noise_contribution, sigma

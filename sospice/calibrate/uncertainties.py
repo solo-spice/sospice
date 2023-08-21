@@ -43,7 +43,7 @@ def spice_error(hdu=None, data=None, header=None, verbose=True):
         print(study)
     instrument = Spice()
     observation = Observation(instrument, study)
-    av_constant_noise_level, sigma = observation.noise_effects_from_l2(
+    av_noise_contribution, sigma = observation.noise_effects_from_l2(
         data, study.av_wavelength
     )
-    return av_constant_noise_level, sigma
+    return av_noise_contribution, sigma
