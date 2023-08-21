@@ -82,11 +82,11 @@ class TestObservation:
         )
         assert u.isclose(av_noise_contribution, 17.8 * specrad_unit)
         expected = {
-            "Dark": 4.219004621945797,
+            "Dark": 5.966573556070519,
             "Background": 0.0,
-            "Read": 9.758073580374356,
+            "Read": 13.8,
             "Signal": 18.920887928424502,
-            "Total": 21.702995184996933,
+            "Total": 24.1669195389069,
         }
         for component in expected:
             assert u.isclose(sigma[component], expected[component] * specrad_unit)

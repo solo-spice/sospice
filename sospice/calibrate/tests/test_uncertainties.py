@@ -19,11 +19,11 @@ def hdus():
             "expected_constant": 42.9513921,
             "pixel_index": (0, 25, 415, 80),
             "expected": {
-                "Dark": 20.36091256,
+                "Dark": 28.79467868,
                 "Background": 0.0,
-                "Read": 66.59878776,
+                "Read": 94.18490889,
                 "Signal": 168.60160232,
-                "Total": 182.41837621,
+                "Total": 195.25990599,
             },
         },
         {  # File used for comparison with MPS' IDL code
@@ -32,11 +32,11 @@ def hdus():
             "expected_constant": 87.80646,
             "pixel_index": (0, 25, 415, 80),
             "expected": {
-                "Dark": 26.718655,
+                "Dark": 37.785884,
                 "Background": 0.0,
-                "Read": 56.098571,
+                "Read": 79.335360,
                 "Signal": 61.990004,
-                "Total": 87.7707,
+                "Total": 107.538983,
             },
         },
     ]
