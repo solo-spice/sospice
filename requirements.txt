@@ -17,4 +17,5 @@ setuptools_scm[toml]>=7.0
 Sphinx>=6.2,<7.0
 sphinx-rtd-theme>=1.2.0
 sunpy>=4.0
+towncrier>=22.0.0
 twine>=4.0
