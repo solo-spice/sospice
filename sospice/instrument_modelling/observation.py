@@ -106,10 +106,12 @@ class Observation:
         Return
         ------
         float:
-            Average contribution of noise to measured signal
+            Average contribution of dark current and background to measured signal
         dict:
             Noise standard deviations for the different components (and total
-            uncertainty resulting from them)
+            uncertainty resulting from them). The components include noise from
+            dark current, noise from the background signal, read noise, shot noise
+            from the signal.
 
         Negative values of the signal are considered to be 0 for the purpose of
         computing the noise on the signal. However, the total uncertainty is
@@ -118,6 +120,9 @@ class Observation:
         We suggest users to replace large negative values of the signal
         (e.g. < -3 * RSS(other noises)) by NaNs.
 
+        Note: the dark and read noise are currently multiplied by √2 to take the
+        effect of dark map (currently: a single dark frame) subtraction, this is
+        **not** consistent with the MPS spice_error IDL routine.
         """
         if wvl is None:
             wvl = self.study.av_wavelength

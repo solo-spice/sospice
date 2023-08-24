@@ -21,11 +21,13 @@ def spice_error(hdu=None, data=None, header=None, verbose=True):
     Return
     ------
     float:
-        Average contribution of noise to measured signal
+        Average contribution of dark current and background to measured signal
     dict:
         Noise standard deviations for the different components (and total)
 
     Either hdu, or data and header should be provided.
+
+    Note: see docstring of ``Observation.noise_effects()`` for more details about methods and assumptions.
     """
     if data is None or header is None:
         if hdu is None:
