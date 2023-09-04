@@ -68,7 +68,8 @@ class Catalog(pd.DataFrame):
             self.release_tag = None
         release = Release(self.release_tag)
         assert release.exists
-        self.filename = download_file(release.catalog_url, cache=True)
+        cache = "update" if self.update_cache else True
+        self.filename = download_file(release.catalog_url, cache=cache)
         self.release_tag = None
 
     def _validate_data_frame(self):
