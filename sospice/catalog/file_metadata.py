@@ -213,7 +213,9 @@ class FileMetadata:
         portion.Interval
             Wavelength ranges
 
-        Wavelength ranges are determined at the center of the slit.
+        Wavelength ranges are determined at the center of the slit,
+        from the WAVECOV header (present from data release 3.0). If it does
+        not exist, an empty interval is returned.
 
         The return value is a Union of wavelength intervals, represented as a ``portion`` object.
 
@@ -227,6 +229,8 @@ class FileMetadata:
         >>> 770 * u.angstrom in file_metadata.get_wavelength_ranges()
         True
         """
+        if type(self.metadata.WAVECOV) != str or "-" not in self.metadata.WAVECOV:
+            return portion.empty()
         ranges = self.metadata.WAVECOV.split(", ")
         ranges = [r.split("-") for r in ranges]
         ranges = [[u.Quantity(r, "nm") for r in rr] for rr in ranges]
