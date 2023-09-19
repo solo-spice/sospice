@@ -2,9 +2,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
+import portion
 
 from astropy.utils.data import download_file
 from parfive import Downloader
+import astropy.units as u
 
 from .release import Release
 
@@ -75,6 +77,9 @@ class FileMetadata:
         Check file metadata
         """
         assert self.metadata is not None
+        if type(self.metadata) is pd.DataFrame:
+            assert len(self.metadata) == 1
+            self.metadata = self.metadata.iloc[0]
         assert not self.metadata.empty
         assert required_columns.issubset(self.metadata.keys())
 
@@ -198,3 +203,38 @@ class FileMetadata:
             result = downloader.download()
             return result
         return None
+
+    def get_wavelengths(self):
+        """
+        Get wavelength ranges for the observation
+
+        Return
+        ------
+        portion.Interval
+            Wavelength ranges
+
+        Wavelength ranges are determined at the center of the slit,
+        from the WAVECOV header (present from data release 3.0). If it does
+        not exist, an empty interval is returned.
+
+        The return value is a Union of wavelength intervals, represented as a ``portion`` object.
+
+        Examples
+        --------
+        The presence of a given wavelength in these intervals can easily be checked, e.g.:
+        >>> import astropy.units as u
+        >>> from sospice import Catalog, FileMetadata
+        >>> catalog = Catalog(release_tag='2.0')
+        >>> file_metadata = FileMetadata(cat.iloc[-1])
+        >>> 770 * u.angstrom in file_metadata.get_wavelength_ranges()
+        True
+        """
+        if type(self.metadata.WAVECOV) != str or "-" not in self.metadata.WAVECOV:
+            return portion.empty()
+        ranges = self.metadata.WAVECOV.split(", ")
+        ranges = [r.split("-") for r in ranges]
+        ranges = [[u.Quantity(r, "nm") for r in rr] for rr in ranges]
+        intervals = portion.empty()
+        for r in ranges:
+            intervals |= portion.closed(*r)
+        return intervals
