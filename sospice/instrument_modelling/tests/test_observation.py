@@ -26,7 +26,7 @@ def header():
 
 @pytest.fixture
 def hdu():
-    url = "https://spice.osups.universite-paris-saclay.fr/spice-data/release-3.0/level2/2022/04/02/solo_L2_spice-n-ras_20220402T111537_V06_100664002-000.fits"
+    url = "https://spice.osups.universite-paris-saclay.fr/spice-data/release-3.0/level2/2022/04/02/solo_L2_spice-n-ras_20220402T111537_V06_100664002-000.fits"  # noqa: E501
     # with fits.open(url) as hdu_list:
     hdu_list = fits.open(url)
     hdu = hdu_list[2]  # Ne VIII window
@@ -77,16 +77,16 @@ class TestObservation:
 
     def test_noise_effects_from_l2(self, observation):
         specrad_unit = u.mW / u.m**2 / u.sr / u.nm
-        av_constant_noise_level, sigma = observation.noise_effects_from_l2(
+        av_noise_contribution, sigma = observation.noise_effects_from_l2(
             0.1 * specrad_unit, 77 * u.nm
         )
-        assert u.isclose(av_constant_noise_level, 17.8 * specrad_unit)
+        assert u.isclose(av_noise_contribution, 17.8 * specrad_unit)
         expected = {
-            "Dark": 4.219004621945797,
+            "Dark": 5.966573556070519,
             "Background": 0.0,
-            "Read": 9.758073580374356,
+            "Read": 13.8,
             "Signal": 18.920887928424502,
-            "Total": 21.702995184996933,
+            "Total": 24.1669195389069,
         }
         for component in expected:
             assert u.isclose(sigma[component], expected[component] * specrad_unit)

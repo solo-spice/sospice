@@ -5,8 +5,10 @@ import pandas as pd
 from parfive import Downloader
 import shutil
 
+import astropy.units as u
+
 from ..file_metadata import FileMetadata
-from .test_catalog import catalog2  # noqa: F401
+from .test_catalog import catalog2, catalog3  # noqa: F401
 from .test_release import release2  # noqa: F401
 
 
@@ -16,8 +18,19 @@ def filename():  # noqa: F811
 
 
 @pytest.fixture
+def filename3():  # noqa: F811
+    return "solo_L2_spice-n-exp_20220305T072522_V02_100663707-014.fits"
+
+
+@pytest.fixture
 def file_metadata(catalog2, filename):  # noqa: F811
-    metadata = catalog2[catalog2.FILENAME == filename].iloc[0]
+    metadata = catalog2[catalog2.FILENAME == filename]
+    return FileMetadata(metadata)
+
+
+@pytest.fixture
+def file_metadata3(catalog3, filename3):  # noqa: F811
+    metadata = catalog3[catalog3.FILENAME == filename3]
     return FileMetadata(metadata)
 
 
@@ -64,3 +77,9 @@ class TestFileMetadata:
         )
         assert result is None
         assert downloader.queued_downloads == 1
+
+    def test_get_wavelengths(self, file_metadata, file_metadata3):
+        wavelengths = file_metadata.get_wavelengths()
+        assert wavelengths.empty
+        wavelengths = file_metadata3.get_wavelengths()
+        assert 770 * u.angstrom in wavelengths

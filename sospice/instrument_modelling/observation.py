@@ -106,10 +106,12 @@ class Observation:
         Return
         ------
         float:
-            Average contribution of noise to measured signal
+            Average contribution of dark current and background to measured signal
         dict:
             Noise standard deviations for the different components (and total
-            uncertainty resulting from them)
+            uncertainty resulting from them). The components include noise from
+            dark current, noise from the background signal, read noise, shot noise
+            from the signal.
 
         Negative values of the signal are considered to be 0 for the purpose of
         computing the noise on the signal. However, the total uncertainty is
@@ -118,17 +120,20 @@ class Observation:
         We suggest users to replace large negative values of the signal
         (e.g. < -3 * RSS(other noises)) by NaNs.
 
+        Note: the dark and read noise are currently multiplied by √2 to take the
+        effect of dark map (currently: a single dark frame) subtraction, this is
+        **not** consistent with the MPS spice_error IDL routine.
         """
         if wvl is None:
             wvl = self.study.av_wavelength
         av_dark_current = self.av_dark_current()
         av_background = self.av_background()
-        av_constant_noise_level = av_dark_current + av_background
+        av_noise_contribution = av_dark_current + av_background
         sigma = dict()
         gain = self.instrument.gain(wvl)
-        sigma["Dark"] = np.sqrt(av_dark_current.value) * u.ct / u.pix
+        sigma["Dark"] = np.sqrt(av_dark_current.value) * np.sqrt(2) * u.ct / u.pix
         sigma["Background"] = np.sqrt(av_background * gain).value * u.ct / u.pix
-        sigma["Read"] = self.read_noise_width
+        sigma["Read"] = self.read_noise_width * np.sqrt(2)
         signal_mean_nonneg = np.maximum(signal_mean, 0)
         sigma["Signal"] = np.sqrt(signal_mean_nonneg * gain).value * u.ct / u.pix
         sigma["Signal"] *= self.instrument.noise_factor(wvl)
@@ -153,7 +158,7 @@ class Observation:
         sigma["Total"][where_neg] = (
             -signal_mean[where_neg] + constant_noises * signal_mean.unit
         )
-        return av_constant_noise_level, sigma
+        return av_noise_contribution, sigma
 
     @u.quantity_input
     def noise_effects_from_l2(
@@ -176,8 +181,8 @@ class Observation:
             Noise standard deviations for the different components (and total)
         """
         data_dn = data * self.study.radcal / u.pix
-        av_constant_noise_level, sigma = self.noise_effects(data_dn, wvl)
-        av_constant_noise_level /= self.study.radcal / u.pix
+        av_noise_contribution, sigma = self.noise_effects(data_dn, wvl)
+        av_noise_contribution /= self.study.radcal / u.pix
         for component in sigma:
             sigma[component] /= self.study.radcal / u.pix
-        return av_constant_noise_level, sigma
+        return av_noise_contribution, sigma

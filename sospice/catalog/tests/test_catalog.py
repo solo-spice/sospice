@@ -12,6 +12,11 @@ def catalog2():
 
 
 @pytest.fixture
+def catalog3():
+    return Catalog(release_tag="3.0")
+
+
+@pytest.fixture
 def catalog_latest():
     return Catalog(release_tag="latest")
 
