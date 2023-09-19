@@ -77,6 +77,9 @@ class FileMetadata:
         Check file metadata
         """
         assert self.metadata is not None
+        if type(self.metadata) is pd.DataFrame:
+            assert len(self.metadata) == 1
+            self.metadata = self.metadata.iloc[0]
         assert not self.metadata.empty
         assert required_columns.issubset(self.metadata.keys())
 
