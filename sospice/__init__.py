@@ -3,3 +3,4 @@ from .catalog.catalog import Catalog
 from .catalog.release import Release
 from .catalog.file_metadata import FileMetadata
 from .calibrate.uncertainties import spice_error
+from .utils.sigma_clipping import sigma_clip
