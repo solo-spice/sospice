@@ -31,6 +31,7 @@ Documentation for this package is available on `Read the Docs <https://sospice.r
    getting_started
    calibration
    catalog
+   utilities
    citation
    api
    develop
