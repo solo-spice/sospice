@@ -3,14 +3,14 @@ from scipy.ndimage import generic_filter
 from numpy import ma
 
 
-def _get_numpy_function(image, name):
+def _get_numpy_function(data, name):
     """
-    Get NaN-aware version of numpy array function if there are any NaNs in image
+    Get NaN-aware version of numpy array function if there are any NaNs in data
 
     Parameters
     ----------
-    image: numpy.array
-        Image
+    data: numpy.array
+        Data
     name: str
         Numpy function name, in its not NaN-aware version
 
@@ -19,29 +19,43 @@ def _get_numpy_function(image, name):
     function
         Numpy function
     """
-    if np.isnan(image.data).any():
+    if np.isnan(data).any():
         name = "nan" + name
     return getattr(np, name)
 
 
-def sigma_clip(image, size, center_method="median", low=3, high=3, iterations=1):
+def sigma_clip(
+    data,
+    size,
+    sigma=3,
+    sigma_lower=None,
+    sigma_upper=None,
+    maxiters=5,
+    centerfunc="median",
+    masked=True,
+):
     """
      Performs sigma-clipping of the input array.
 
      Parameters
      ----------
-    image: numpy.ndarray
-        Input image or image cube
+    data: numpy.ndarray
+        Input array
     size: int or tuple[int]
         Size of the kernel used to compute the running median (or mean) and standard deviation
-    center_method: str
-        Method used to estimate the center of the local intensity distribution ("median" (default) or "mean")
-    low: float
+    sigma: float
+        The number of standard deviations to use for both the lower and upper clipping limit.
+        This is overriden by `sigma_lower` and `sigma_upper`
+    sigma_lower: float
         Low threshold, in units of the standard deviation of the local intensity distribution
-    high: float
+    sigmer_upper: float
         High threshold, in units of the standard deviation of the local intensity distribution
-    iterations: int
-        Number of iterations to perform
+    maxiters: int
+        Maximum number of iterations to perform
+    centerfunc: str
+        Method used to estimate the center of the local intensity distribution ("median" (default) or "mean")
+    masked: bool
+        Return a `numpy.ma.MaskedArray` (default) instead of an `numpy.array`
 
     Returns
     -------
@@ -49,16 +63,25 @@ def sigma_clip(image, size, center_method="median", low=3, high=3, iterations=1)
         Filtered array, with clipped pixels replaced by the estimated value of the center of the
         local intensity distribution (either median or mean).
     """
-    output = np.copy(image)
+    output = np.copy(data)
     if type(size) is int:
-        size = (size,) * image.ndim
-    for iteration in range(iterations):
-        center = generic_filter(
-            output, _get_numpy_function(output, center_method), size
-        )
+        size = (size,) * data.ndim
+    sigma_lower = sigma_lower or sigma
+    sigma_upper = sigma_upper or sigma
+    maxiters = maxiters or np.inf
+    nchanged = 1
+    iteration = 0
+    while nchanged != 0 and (iteration < maxiters):
+        iteration += 1
+        center = generic_filter(output, _get_numpy_function(output, centerfunc), size)
         stddev = generic_filter(output, _get_numpy_function(output, "std"), size)
         diff = output - center
-        output[(diff > high * stddev) | (diff < -low * stddev)] = np.nan
+        new_mask = (diff > sigma_upper * stddev) | (diff < -sigma_lower * stddev)
+        output[new_mask] = np.nan
+        nchanged = np.count_nonzero(new_mask)
     nan = np.isnan(output)
     output[nan] = center[nan]
-    return ma.masked_array(output, mask=nan)
+    if masked:
+        return ma.masked_array(output, mask=nan)
+    else:
+        return output
