@@ -18,11 +18,6 @@ def image_2d(image_1d):
     return image_2d
 
 
-@pytest.fixture
-def image_3d(image_2d):
-    return np.stack(image_2d, 2 * image_2d, axis=0)
-
-
 class TestSigmaClip:
     def test_get_numpy_function(self, image_1d):
         assert _get_numpy_function(image_1d, "mean") == np.mean
