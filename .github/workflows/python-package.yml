@@ -37,7 +37,9 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        python -m setuptools_scm
+        python -c "import setuptools_scm; version = setuptools_scm.get_version(); setuptools_scm.dump_version('sospice', version, '_version.py')"
+        ls -l _version.py || echo "_version.py not found"
+        ls -l sospice/_version.py ||  echo "sospice/_version.py not found"
         pytest --cov --cov-report=xml
     - name: Upload coverage reports to Codecov with GitHub Action
       uses: codecov/codecov-action@v3

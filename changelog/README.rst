@@ -12,7 +12,7 @@ The ``CHANGELOG`` will be read by users, so this description should be aimed at 
 
 Make sure to use full sentences with correct case and punctuation, for example::
 
-    Add support for PSF correction`.
+    Add support for PSF correction.
 
 Please try to use Sphinx intersphinx using backticks.
 
