@@ -63,6 +63,10 @@ omit = [
     "__init__.py",
 ]
 
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--ignore=local"
+
 [tool.towncrier]
 package = "sospice"
 filename = "CHANGELOG.rst"
