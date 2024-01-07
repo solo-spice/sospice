@@ -260,3 +260,36 @@ class Catalog(pd.DataFrame):
                 .T
             )
         return df
+
+    def mid_time(self, method=None):
+        """
+        Find "middle time" for observations in catalog
+
+        Parameters
+        ----------
+        method: str
+            Method for determining middle time. Can be
+
+            * "midrange" (default): middle of time range, from beginning of first observation to end of last observation
+            * "mean": mean of observation times (not weighted by observations durations)
+
+        """
+        if method is None or method == "midrange":
+            begin_min = self["DATE-BEG"].min()
+            begin_max = self["DATE-BEG"].max()
+            last_telapse = self[self["DATE-BEG"] == begin_max].TELAPSE.max()
+            end_max = begin_max + pd.Timedelta(seconds=last_telapse)
+            return begin_min + (end_max - begin_min) / 2
+        elif method == "mean":
+            begin_mean = self["DATE-BEG"].mean()
+            telapse_mean = pd.Timedelta(seconds=self.TELAPSE.mean())
+            return begin_mean + telapse_mean
+        elif method == "barycenter":
+            mid_observation = self["DATE-BEG"] + self.apply(
+                lambda row: pd.Timedelta(seconds=row.TELAPSE / 2), axis=1
+            )
+            weight = self.TELAPSE
+            t0 = mid_observation.iloc[0]
+            return t0 + ((mid_observation - t0) * weight).sum() / weight.sum()
+        else:
+            raise RuntimeError("Invalid method")
