@@ -6,6 +6,8 @@ from parfive import Downloader
 import shutil
 
 import astropy.units as u
+from astropy.coordinates import SkyCoord
+from sunpy.coordinates import Helioprojective
 
 from ..file_metadata import FileMetadata
 from .test_catalog import catalog2, catalog3  # noqa: F401
@@ -83,3 +85,48 @@ class TestFileMetadata:
         assert wavelengths.empty
         wavelengths = file_metadata3.get_wavelengths()
         assert 770 * u.angstrom in wavelengths
+
+    def test_get_wcs_2d(self, file_metadata):
+        wcs = file_metadata.get_wcs_2d()
+        assert wcs.naxis == 2
+        header = wcs.to_header()
+        assert u.isclose(
+            [header[key] for key in ["PC1_1", "PC1_2", "PC2_1", "PC2_2"]],
+            [0.99987010573307, 0.017696941938863, -0.014678901147361, 0.99987010573307],
+        ).all()
+        assert u.isclose(
+            [header[key] for key in ["CDELT1", "CDELT2"]],
+            [
+                0.00027777777777778,
+                0.000305,
+            ],
+        ).all()
+        assert u.isclose(
+            [header[key] for key in ["CRPIX1", "CRPIX2"]], [1.0, 512.5]
+        ).all()
+        assert u.isclose(
+            [header[key] for key in ["CRVAL1", "CRVAL2"]],
+            [0.091694158333333, -0.138730775],
+        ).all()
+        assert header["CUNIT1"] == "deg"
+
+    def test_get_observer(self, file_metadata):
+        observer = file_metadata.get_observer()
+        assert u.isclose(observer.lon, -3.3713006 * u.deg)
+        assert u.isclose(observer.lat, -4.2335761 * u.deg)
+        assert u.isclose(observer.radius, 0.52286922 * u.au)
+
+    def test_get_fov(self, file_metadata):
+        observer = file_metadata.get_observer()
+        frame = Helioprojective(observer=observer, obstime=observer.obstime)
+        expected_top_left = SkyCoord(
+            *[320.53810957, -1061.52431529] * u.arcsec, frame=frame
+        )
+        fov = file_metadata.get_fov()
+        assert fov.observer == observer
+        assert u.isclose(fov[0].Tx, expected_top_left.Tx)
+        assert u.isclose(fov[0].Ty, expected_top_left.Ty)
+        fov = file_metadata.get_fov(method="arc")
+        assert fov.observer == observer
+        assert u.isclose(fov[0].Tx, expected_top_left.Tx)
+        assert u.isclose(fov[0].Ty, expected_top_left.Ty)
