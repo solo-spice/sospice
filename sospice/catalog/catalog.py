@@ -1,11 +1,15 @@
 from dataclasses import dataclass
-
-import pandas as pd
 from pathlib import Path
+from itertools import cycle
+
+import matplotlib.colors as mcolors
+import pandas as pd
+import numpy as np
+
 from astropy.utils.data import download_file
 
 from .release import Release
-from .file_metadata import required_columns
+from .file_metadata import FileMetadata, required_columns
 
 
 @dataclass
@@ -293,3 +297,36 @@ class Catalog(pd.DataFrame):
             return t0 + ((mid_observation - t0) * weight).sum() / weight.sum()
         else:
             raise RuntimeError("Invalid method")
+
+    def plot_fov(self, ax, **kwargs):
+        """
+        Plot SPICE FOVs on a background map
+
+        Parameters
+        ----------
+        ax: matplotlib.axes.Axes
+            Axes (with relevant projection)
+        kwargs: dict
+            Keyword arguments, passed to FileMetadata.plot_fov()
+        """
+        time_range_length = self["DATE-BEG"].max() - self["DATE-BEG"].min()
+        if time_range_length > pd.Timedelta(days=60):
+            print(
+                f"Time range length is {time_range_length}, this is long, and probably not what you want; aborting"
+            )
+            return
+        # TODO color by STUDY, group by SPIOBSID, optionally merge repeats
+        color = kwargs.pop("color", None)
+        studies = sorted(list(self.STUDY.unique()))
+        colors = mcolors.TABLEAU_COLORS if color is None else [color]
+        study_color = dict(zip(studies, cycle(colors)))
+        self.apply(
+            lambda row: FileMetadata(row).plot_fov(
+                ax, color=study_color[row.STUDY], label=row.STUDY, **kwargs
+            ),
+            axis=1,
+        )
+        handles, labels = ax.get_legend_handles_labels()
+        unique_indices = [labels.index(x) for x in sorted(set(labels))]
+        handles = list(np.array(handles)[unique_indices])
+        ax.legend(handles=handles)
