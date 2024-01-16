@@ -28,13 +28,18 @@ required_columns = {
     "DATE-BEG",
     "SPIOBSID",
     "RASTERNO",
+    "STUDY",
     "STUDYTYP",
     "MISOSTUD",
     "XPOSURE",
     "CRVAL1",
     "CDELT1",
+    "CTYPE1",
+    "CUNIT1",
     "CRVAL2",
     "CDELT2",
+    "CTYPE2",
+    "CUNIT2",
     "STP",
     "DSUN_AU",
     "CROTA",
@@ -53,6 +58,7 @@ required_columns = {
     "PRPROC1",
     "PRPVER1",
     "PRPARA1",
+    "TELAPSE",
 }
 
 
@@ -412,4 +418,23 @@ class FileMetadata:
         for k in ["points", "method"]:
             fov_args[k] = kwargs.pop(k, None)
         fov_coords = self.get_fov(**fov_args)
+        for key in ["label", "color", "linestyle"]:
+            index = "fov_" + key
+            if index in self.metadata.index:
+                value = self.metadata[index]
+                if key == "color" and type(value) is float and np.isnan(value):
+                    continue
+                kwargs[key] = self.metadata[index]
         ax.plot_coord(fov_coords, **kwargs)
+        if "fov_text" in self.metadata.index:
+            text_args = [fov_coords[0], self.metadata.fov_text]
+            text_kwargs = {"rotation": "vertical", "ha": "right"}
+            if "fov_color" in self.metadata.index:
+                text_kwargs["color"] = self.metadata.fov_color
+            if "text_coord" in dir(ax):  # astropy ≥ 6
+                ax.text_coord(*text_args, **text_kwargs)
+            else:  # astropy < 6; to be deprecated at some point
+                text_args, text_kwargs = ax._transform_plot_args(
+                    *text_args, **text_kwargs
+                )
+                ax.text(*text_args, **text_kwargs)

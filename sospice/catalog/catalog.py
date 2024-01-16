@@ -298,6 +298,36 @@ class Catalog(pd.DataFrame):
         else:
             raise RuntimeError("Invalid method")
 
+    @classmethod
+    def _format_time_range(cls, row, timespec="minutes"):
+        """
+        Format time range for observation
+
+        Parameters
+        ----------
+        row: pd.Series
+            Catalog row
+        timespec: str
+            Time terms specification for pandas.Timestamp.isoformat()
+
+        Return
+        ------
+        str
+            Formatted time range
+
+        The end of the time range is known from the single observation in `row`
+        thanks to an additional element `last_DATE-BEG' in the Series.
+        All dates are DATE-BEG, we don't compute a DATE-END.
+        """
+        t = [row["DATE-BEG"]]
+        is_range = ("last_DATE-BEG" in row.index) and (row["last_DATE-BEG"] != t[0])
+        if is_range:
+            t.append(row["last_DATE-BEG"])
+        t_str = [tt.isoformat(timespec=timespec) for tt in t]
+        if is_range and t_str[0][:10] == t_str[1][:10]:
+            t_str[1] = t_str[1][10:]
+        return " - ".join(t_str)
+
     def plot_fov(self, ax, **kwargs):
         """
         Plot SPICE FOVs on a background map
@@ -306,6 +336,8 @@ class Catalog(pd.DataFrame):
         ----------
         ax: matplotlib.axes.Axes
             Axes (with relevant projection)
+        color: str or list
+            Color(s) cycle for drawing the FOVs
         kwargs: dict
             Keyword arguments, passed to FileMetadata.plot_fov()
         """
@@ -315,17 +347,47 @@ class Catalog(pd.DataFrame):
                 f"Time range length is {time_range_length}, this is long, and probably not what you want; aborting"
             )
             return
-        # TODO color by STUDY, group by SPIOBSID, optionally merge repeats
+        merge_by_spiobsid = True
+        if merge_by_spiobsid:
+            groups = self.groupby("SPIOBSID")
+            fovs = groups.first()
+            fovs_last = groups.last()
+            fovs["last_DATE-BEG"] = fovs_last["DATE-BEG"]
+            fovs.reset_index(inplace=True)
+        else:
+            fovs = Catalog(data_frame=self[list(required_columns)])
+        # label at the position of the plot
+        fovs["fov_text"] = fovs.apply(Catalog._format_time_range, axis=1)
+        # label at the level of the plot (will be de-duplicated afterwards)
+        fovs["fov_label"] = fovs.STUDY
+        # color(s)
         color = kwargs.pop("color", None)
         studies = sorted(list(self.STUDY.unique()))
-        colors = mcolors.TABLEAU_COLORS if color is None else [color]
+        colors = (
+            mcolors.TABLEAU_COLORS
+            if color is None
+            else color
+            if type(color) is list
+            else [color]
+        )
         study_color = dict(zip(studies, cycle(colors)))
-        self.apply(
-            lambda row: FileMetadata(row).plot_fov(
-                ax, color=study_color[row.STUDY], label=row.STUDY, **kwargs
-            ),
+        fovs["fov_color"] = fovs.apply(lambda row: study_color[row.STUDY], axis=1)
+        fovs.apply(
+            lambda row: FileMetadata(row).plot_fov(ax, **kwargs),
             axis=1,
         )
+        if merge_by_spiobsid:
+            # also plot last FOV, with dashes
+            fovs_last.reset_index(inplace=True)
+            fovs_last["fov_color"] = fovs.fov_color
+            fovs_last["fov_linestyle"] = ":"
+            fovs_last = fovs_last[fovs_last.RASTERNO != 0]
+            fovs_last.apply(
+                lambda row: FileMetadata(row).plot_fov(ax, **kwargs),
+                axis=1,
+            )
+        # De-duplicate labels for legend (an alternative would be
+        # to provide labels only to the first instance of each study)
         handles, labels = ax.get_legend_handles_labels()
         unique_indices = [labels.index(x) for x in sorted(set(labels))]
         handles = list(np.array(handles)[unique_indices])

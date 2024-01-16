@@ -35,18 +35,24 @@ def catalog_df():
             "NAXIS3": [41, 44, 47],
             "NAXIS4": [1, 1, 1],
             "OBT_BEG": [0, 0, 0],
+            "TELAPSE": [60, 1, 1],
             "LEVEL": ["L2", 0, 0],
             "FILENAME": [0, 0, 0],
             "DATE-BEG": [pd.Timestamp("2023-02-01T12:34"), 0, 0],
             "SPIOBSID": [0, 0, 0],
             "RASTERNO": [0, 0, 0],
             "STUDYTYP": [0, 0, 0],
+            "STUDY": ["Compo", "Dynamics", "Whatever"],
             "MISOSTUD": [0, 0, 0],
             "XPOSURE": [0, 0, 0],
             "CRVAL1": [0, 0, 0],
             "CDELT1": [0, 0, 0],
+            "CTYPE1": ["HPLN-TAN"] * 3,
+            "CUNIT1": ["arcsec"] * 3,
             "CRVAL2": [0, 0, 0],
             "CDELT2": [0, 0, 0],
+            "CTYPE2": ["HPLT-TAN"] * 3,
+            "CUNIT2": ["arcsec"] * 3,
             "STP": [0, 0, 0],
             "DSUN_AU": [0, 0, 0],
             "CROTA": [0, 0, 0],
@@ -104,7 +110,7 @@ class TestCatalog:
 
     def test_init_dataframe(self, catalog_df):
         assert len(catalog_df) == 3
-        assert len(catalog_df.columns) == 36
+        assert len(catalog_df.columns) == 42
         assert catalog_df.iloc[1].NAXIS2 == 101
 
     def test_find_files_by_keywords(self, catalog2):
@@ -155,3 +161,31 @@ class TestCatalog:
         result = catalog2.find_files(closest_to_date="2021-10-10")
         assert len(result) == 1
         assert result.iloc[0].FILENAME == expected_filename
+
+    def test__format_time_range(self, catalog2):
+        cat = catalog2.find_files(level="L2", spiobsid=117440593)
+        row = cat.iloc[0].copy()
+        assert Catalog._format_time_range(row) == "2022-04-12T08:00"
+        row["last_DATE-BEG"] = cat.iloc[-1]["DATE-BEG"]
+        assert Catalog._format_time_range(row) == "2022-04-12T08:00 - T08:51"
+        row["last_DATE-BEG"] = pd.Timestamp("2022-04-13T12:00")
+        assert Catalog._format_time_range(row) == "2022-04-12T08:00 - 2022-04-13T12:00"
+
+    def test_mid_time(self, catalog2):
+        cat = catalog2.find_files(level="L2", spiobsid=117440593)
+        assert (
+            abs(cat.mid_time() - pd.Timestamp("2022-04-12 08:26:46")).total_seconds()
+            < 1  # noqa: W503
+        )
+        assert (
+            abs(
+                cat.mid_time(method="mean") - pd.Timestamp("2022-04-12 08:27:16")
+            ).total_seconds()
+            < 1  # noqa: W503
+        )
+        assert (
+            abs(
+                cat.mid_time(method="barycenter") - pd.Timestamp("2022-04-12 08:26:47")
+            ).total_seconds()
+            < 1  # noqa: W503
+        )
