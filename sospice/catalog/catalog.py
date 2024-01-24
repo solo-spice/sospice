@@ -164,7 +164,7 @@ class Catalog(pd.DataFrame):
 
     def find_files_by_date_range(self, date_min=None, date_max=None):
         """
-        Find files in some date range.
+        Find files with DATE-BEG in some date range.
 
         Parameters
         ----------
