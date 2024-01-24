@@ -8,10 +8,10 @@ This provides a version of
 `astropy.stats.sigma_clip <https://docs.astropy.org/en/stable/api/astropy.stats.sigma_clip.html>`__
 working on a local neighbourhood.
 
-Plotting field-of-views over a background map
+Plotting fields-of-view over a background map
 ----------------------------------------------------
 
-Once observations are selected from a ``Catalog``, their Field-Of-Views (FOVs) can be plotted using ``plot_fovs_with_background()``. Different background maps can be selected: maps with some specific data (e.g. a HMI synoptic map or Solar Orbiter/EUI/FSI), a blank map with some projection (in development), or any map already plotted by the user.
+Once observations are selected from a ``Catalog``, their Fields-Of-View (FOVs) can be plotted using ``plot_fovs_with_background()``. Different background maps can be selected: maps with some specific data (e.g. a HMI synoptic map or Solar Orbiter/EUI/FSI), a blank map with some projection (in development), or any map already plotted by the user.
 
 After
 
