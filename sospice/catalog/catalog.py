@@ -359,7 +359,9 @@ class Catalog(pd.DataFrame):
         # label at the position of the plot
         fovs["fov_text"] = fovs.apply(Catalog._format_time_range, axis=1)
         # label at the level of the plot (will be de-duplicated afterwards)
-        fovs["fov_label"] = fovs.STUDY
+        fovs["fov_label"] = fovs.apply(
+            lambda row: f"{row.STUDY} ({row.MISOSTUD})", axis=1
+        )
         # color(s)
         color = kwargs.pop("color", None)
         studies = sorted(list(self.STUDY.unique()))
