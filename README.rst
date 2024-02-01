@@ -51,11 +51,17 @@ Documentation for this package is available on `Read the Docs <https://sospice.r
 -  Instrument modelling: ``instrument_modelling``
 
    -  ``Spice``: instrument calibration parameters, effective area,
-      quantum efficiency…
+      quantum efficiency...
    -  ``Study``: study parameters.
    -  ``Observation``: a SPICE observation with some study (including
       low-level functions used to compute the uncertainties on the
       data).
+
+- Other utilities: ``util``
+
+   - ``sigma_clipping``: sigma clipping (for cosmic rays removal).
+   - ``fov``: plot SPICE field-of-views on a background map.
+
 
 Package philosophy
 ------------------

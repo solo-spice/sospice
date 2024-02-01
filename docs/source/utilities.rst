@@ -17,7 +17,7 @@ After
 
 .. code:: python
 
-    from sospice import Catalog, plot_fovs_with_background,
+    from sospice import Catalog, plot_fovs_with_background
     cat = Catalog(release_tag="4.0")
 
 one can select for example all files for which ``DATE-BEG`` is on a given day
