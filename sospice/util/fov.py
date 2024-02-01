@@ -52,8 +52,8 @@ class FovBackground:
 
     map_types = {
         "default": "plot_blank_helioprojective",
-        "blank": "plot_blank_helioprojective",
-        "blank_hp": "plot_blank_helioprojective",
+        # "blank": "plot_blank_helioprojective",
+        # "blank_hp": "plot_blank_helioprojective",
         "blank_helioprojective": "plot_blank_helioprojective",
         "HMI_synoptic": "plot_HMI_synoptic",
         "EUI/FSI": "plot_EUI_FSI",
@@ -156,8 +156,8 @@ class FovBackground:
         matplotlib.axes.Axes
             Axes (with relevant projection)
         """
-        pass
-        return None, None
+        raise NotImplementedError("Blank map background not implemented yet")
+        return
         # return fig, ax
 
     def plot_map(self, show=True, save=None):
