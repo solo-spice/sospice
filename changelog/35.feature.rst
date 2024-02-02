@@ -1,1 +1,1 @@
-Add local sigma clipping
+Add local sigma clipping.
