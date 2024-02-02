@@ -16,12 +16,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.11"]
+        python-version: ["3.9", "3.12"]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -37,7 +37,10 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        python -m setuptools_scm
+        python -c "import setuptools_scm; version = setuptools_scm.get_version(); setuptools_scm.dump_version('sospice', version, '_version.py')"
+        ls -l _version.py || echo "_version.py not found"
+        ls -l sospice/_version.py ||  echo "sospice/_version.py not found"
         pytest --cov --cov-report=xml
+# Codecov should be updated to @v4 but then there is a key not certified / token not found error
     - name: Upload coverage reports to Codecov with GitHub Action
       uses: codecov/codecov-action@v3

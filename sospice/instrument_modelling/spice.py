@@ -95,9 +95,9 @@ class Spice:
             Detector name (None if not on a detector)
         """
         wvl = wvl.to(u.Angstrom).value
-        if 703 < wvl < 791:
+        if 700 < wvl < 793:
             return "SW"
-        elif 970 < wvl < 1053:
+        elif 968 < wvl < 1055:
             return "LW"
         else:
             return None

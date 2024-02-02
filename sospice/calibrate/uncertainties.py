@@ -37,7 +37,6 @@ def spice_error(hdu=None, data=None, header=None, verbose=True):
     if header["LEVEL"] != "L2":
         raise RuntimeError("Level should be L2")
     data *= u.Unit(header["BUNIT"])
-    print(data.unit)
     study = Study()
     study.init_from_header(header)
     if verbose:
