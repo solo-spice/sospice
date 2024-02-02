@@ -46,9 +46,9 @@ class FovBackground:
     """
 
     map_type: str = "default"
-    cat: Catalog | None = None
-    time: pd.Timestamp | None = None
-    observer: SkyCoord | None = None
+    cat: Catalog = None
+    time: pd.Timestamp = None
+    observer: SkyCoord = None
 
     map_types = {
         "default": "plot_blank_helioprojective",
