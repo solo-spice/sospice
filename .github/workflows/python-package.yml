@@ -41,5 +41,6 @@ jobs:
         ls -l _version.py || echo "_version.py not found"
         ls -l sospice/_version.py ||  echo "sospice/_version.py not found"
         pytest --cov --cov-report=xml
+# Codecov should be updated to @v4 but then there is a key not certified / token not found error
     - name: Upload coverage reports to Codecov with GitHub Action
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v3
