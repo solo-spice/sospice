@@ -22,7 +22,7 @@ class Catalog(pd.DataFrame):
     filename: str
         A file name (or URL) for the catalog
     release_tag: str
-        A release tag. The catalog is fetched online and dowloaded to the astropy cache.
+        A release tag. The catalog is fetched online and downloaded to the astropy cache.
     data_frame: pandas.DataFrame
         A pandas DataFrame to be used as SPICE catalog. Some basic checks are made to ensure
         that is can be used as a SPICE catalog.

@@ -238,11 +238,11 @@ class FileMetadata:
         >>> import astropy.units as u
         >>> from sospice import Catalog, FileMetadata
         >>> catalog = Catalog(release_tag='2.0')
-        >>> file_metadata = FileMetadata(cat.iloc[-1])
+        >>> file_metadata = FileMetadata(catalog.iloc[-1])
         >>> 770 * u.angstrom in file_metadata.get_wavelength_ranges()
         True
         """
-        if type(self.metadata.WAVECOV) != str or "-" not in self.metadata.WAVECOV:
+        if type(self.metadata.WAVECOV) is not str or "-" not in self.metadata.WAVECOV:
             return portion.empty()
         ranges = self.metadata.WAVECOV.split(", ")
         ranges = [r.split("-") for r in ranges]
