@@ -1,5 +1,21 @@
+0.0.8 (2024-02-02)
+==================
+
+New Features
+------------
+
+- Add local sigma clipping. (`#35 <https://github.com/solo-spice/sospice/pull/35>`__)
+- Add field of view plotting on a background (including a SDO/HMI synoptic map or a Solar Orbiter/EUI/FSI image). (`#43 <https://github.com/solo-spice/sospice/pull/43>`__)
+
+
+Internal Changes
+----------------
+
+- Update package versions and CI tests Python versions and Github actions. (`#1 <https://github.com/solo-spice/sospice/pull/1>`__)
+
+
 0.0.7 (2023-09-19)
-===========================================
+==================
 
 Removals
 --------
