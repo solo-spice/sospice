@@ -12,7 +12,7 @@ class Release:
         """
         Initialize object to latest release if no release tag set
         """
-        if self.tag is None:
+        if self.tag is None or self.tag == "latest":
             self.tag = self.latest_tag
 
     @property
