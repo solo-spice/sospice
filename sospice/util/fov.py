@@ -109,9 +109,14 @@ class FovBackground:
         )
         return fig, ax
 
-    def plot_EUI_FSI(self):
+    def plot_EUI_FSI(self, delta_t=pd.Timedelta(hours=1)):
         """
         Plot Solar Orbiter/EUI/FSI map, intended as a background for plotting SPICE FOVs
+
+        Parameters
+        ----------
+        delta_t: pandas.Timedelta
+            Half-width of time interval in which to look to EUI data
 
         Return
         ------
@@ -120,7 +125,6 @@ class FovBackground:
         matplotlib.axes.Axes
             Axes (with relevant projection)
         """
-        delta_t = pd.Timedelta(minutes=30)
         results_fsi = Fido.search(
             attrs.Time(self.time - delta_t, self.time + delta_t),
             attrs.soar.Product("eui-fsi174-image"),
@@ -130,6 +134,7 @@ class FovBackground:
         str_n_found = f"for {self.time} ± {delta_t}"
         if n_found == 0:
             raise RuntimeError("No file found " + str_n_found)
+            # TODO rather revert to blank map
         else:
             print(f"{n_found} files found for {str_n_found}")
         delay = pd.Series(results_fsi[0]["Start time"]).apply(pd.Timestamp) - self.time
@@ -160,7 +165,7 @@ class FovBackground:
         return
         # return fig, ax
 
-    def plot_map(self, show=True, save=None):
+    def plot_map(self, show=True, save=None, **kwargs):
         """
         Plot map, intended as a background for plotting SPICE FOVs
 
@@ -170,6 +175,8 @@ class FovBackground:
             Show figure. Then returns None, None
         save: str
             File to save figure to
+        kwargs: dict
+            Additional parameters for the plotting functions
 
         Return
         ------
@@ -179,12 +186,12 @@ class FovBackground:
             Axes (with relevant projection)
         """
         plot_function = getattr(self, self.map_types[self.map_type])
-        fig, ax = plot_function()  # no need for self anywhere?
+        fig, ax = plot_function(**kwargs)
         return _show_or_save(fig, ax, show, save)
 
 
 def plot_fov_background(
-    map_type=None, cat=None, time=None, observer=None, show=True, save=None
+    map_type=None, cat=None, time=None, observer=None, show=True, save=None, **kwargs
 ):
     """
     Plot map, intended as a background for plotting SPICE FOVs
@@ -203,6 +210,8 @@ def plot_fov_background(
         Show figure. Then returns None, None
     save: str
         File to save figure to
+    kwargs: dict
+        Additional parameters for the plotting functions
 
     Return
     ------
@@ -214,7 +223,7 @@ def plot_fov_background(
     fov_background = FovBackground(
         map_type=map_type, cat=cat, time=time, observer=observer
     )
-    fig, ax = fov_background.plot_map(show=False)
+    fig, ax = fov_background.plot_map(show=False, **kwargs)
     return _show_or_save(fig, ax, show, save)
 
 
@@ -227,6 +236,7 @@ def plot_fovs_with_background(
     fig=None,
     ax=None,
     save=None,
+    bg_kwargs=dict(),
     **kwargs,
 ):
     """
@@ -250,6 +260,8 @@ def plot_fovs_with_background(
         Show figure. Then returns None, None
     save: str
         File to save figure to
+    bg_kwargs: dict
+        Keyword arguments for plot_fov_background()
     kwargs: dict
         Keyword arguments for Catalog.plot_fov()
 
@@ -262,7 +274,12 @@ def plot_fovs_with_background(
     """
     if fig is None or ax is None:
         fig, ax = plot_fov_background(
-            map_type=map_type, cat=cat, time=time, observer=observer, show=False
+            map_type=map_type,
+            cat=cat,
+            time=time,
+            observer=observer,
+            show=False,
+            **bg_kwargs,
         )
     cat.plot_fov(ax, **kwargs)
     return _show_or_save(fig, ax, show, save)
