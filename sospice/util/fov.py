@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from tempfile import TemporaryDirectory
-from pathlib import Path
+from platformdirs import user_data_path
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -139,15 +138,13 @@ class FovBackground:
             print(f"{n_found} files found for {str_n_found}")
         delay = pd.Series(results_fsi[0]["Start time"]).apply(pd.Timestamp) - self.time
         i_closest = abs(delay).argmin()
-        with TemporaryDirectory(prefix="tmp-fsi-") as tmp_dir:
-            fsi_file = Fido.fetch(
-                results_fsi[0][i_closest], path=Path(tmp_dir) / "{file}"
-            )
-            fsi_filename = fsi_file[0]
-            fig = plt.figure(figsize=(10, 10))
-            fsi_map = Map(fsi_filename)
-            ax = fig.add_subplot(projection=fsi_map)
-            fsi_map.plot(axes=ax)
+        path = user_data_path(appname="sospice", ensure_exists=True)
+        fsi_file = Fido.fetch(results_fsi[0][i_closest], path=path / "{file}")
+        fsi_filename = fsi_file[0]
+        fig = plt.figure(figsize=(10, 10))
+        fsi_map = Map(fsi_filename)
+        ax = fig.add_subplot(projection=fsi_map)
+        fsi_map.plot(axes=ax)
         return fig, ax
 
     def plot_blank_helioprojective(self):
