@@ -5,9 +5,9 @@ import astropy.units as u
 import numpy as np
 from astropy.io import fits
 from astropy.wcs import WCS
-from ndcube import NDCollection
+from ndcube import NDCollection, NDMeta
 from sunraster import RasterSequence, SpectrogramCube, SpectrogramSequence
-from sunraster.meta import Meta, SlitSpectrographMetaABC
+from sunraster.meta import SlitSpectrographMetaABC
 
 from sospice.meta import SPICEMeta
 

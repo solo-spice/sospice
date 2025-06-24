@@ -8,10 +8,11 @@ from astropy.io import fits
 from astropy.time import Time
 from ndcube import NDCollection
 from sunpy.coordinates import HeliographicStonyhurst
-
 from sunraster import RasterSequence, SpectrogramCube, SpectrogramSequence
-from sunraster.instr.spice import SPICEMeta, read_spice_l2_fits
-from sunraster.tests import test_data_dir
+
+from sospice.meta import SPICEMeta
+from sospice.io import read_spice_l2_fits
+from sunraster.tests import TEST_DATA_PATH
 
 READ_SPICE_L2_FITS_RETURN_TYPE = NDCollection
 SPECTRAL_WINDOW = ("WINDOW0_74.73", "Extension name")
@@ -85,10 +86,9 @@ def spice_fits_header():
 
 @pytest.fixture
 def spice_meta(spice_fits_header):
-    return SPICEMeta(
-        spice_fits_header,
-        comments=zip(spice_fits_header.keys(), spice_fits_header.comments),
-    )
+    return SPICEMeta(spice_fits_header,
+                     key_comments=dict(zip(spice_fits_header.keys(), spice_fits_header.comments))
+                    )
 
 
 @pytest.fixture
@@ -99,13 +99,14 @@ def spice_rasdb_filename(tmp_path):
 
     A new FITS file is saved in a tmp file path.
     """
+    rng_gen = np.random.default_rng()
     filename = "solo_L2_spice-n-ras-db_20200602T081733_V01_12583760-000.fits"
-    with fits.open(os.path.join(test_data_dir, filename)) as hdulist:
+    with fits.open(TEST_DATA_PATH / filename) as hdulist:
         new_hdulist = fits.HDUList()
-        new_hdulist.append(fits.PrimaryHDU(np.random.rand(1, 48, 832, 30), header=hdulist[0].header))
-        new_hdulist.append(fits.ImageHDU(np.random.rand(1, 48, 832, 30), header=hdulist[1].header))
-        new_hdulist.append(fits.ImageHDU(np.random.rand(1, 56, 64, 30), header=hdulist[2].header))
-        new_hdulist.append(fits.ImageHDU(np.random.rand(1, 56, 64, 30), header=hdulist[3].header))
+        new_hdulist.append(fits.PrimaryHDU(rng_gen.random((1, 48, 832, 30)), header=hdulist[0].header))
+        new_hdulist.append(fits.ImageHDU(rng_gen.random((1, 48, 832, 30)), header=hdulist[1].header))
+        new_hdulist.append(fits.ImageHDU(rng_gen.random((1, 56, 64, 30)), header=hdulist[2].header))
+        new_hdulist.append(fits.ImageHDU(rng_gen.random((1, 56, 64, 30)), header=hdulist[3].header))
         new_hdulist.append(hdulist[-1])
         tmp_spice_path = tmp_path / "spice"
         if not os.path.exists(tmp_spice_path):
@@ -122,11 +123,12 @@ def spice_sns_filename(tmp_path):
 
     A new FITS file is saved in a tmp file path.
     """
+    rng_gen = np.random.default_rng()
     filename = "solo_L2_spice-n-sit_20200620T235901_V01_16777431-000.fits"
-    with fits.open(os.path.join(test_data_dir, filename)) as hdulist:
+    with fits.open(TEST_DATA_PATH / filename) as hdulist:
         new_hdulist = fits.HDUList()
-        new_hdulist.append(fits.PrimaryHDU(np.random.rand(32, 48, 1024, 1), header=hdulist[0].header))
-        new_hdulist.append(fits.ImageHDU(np.random.rand(32, 48, 1024, 1), header=hdulist[1].header))
+        new_hdulist.append(fits.PrimaryHDU(rng_gen.random((32, 48, 1024, 1)), header=hdulist[0].header))
+        new_hdulist.append(fits.ImageHDU(rng_gen.random((32, 48, 1024, 1)), header=hdulist[1].header))
         new_hdulist.append(hdulist[-1])
         tmp_spice_path = tmp_path / "spice"
         if not os.path.exists(tmp_spice_path):

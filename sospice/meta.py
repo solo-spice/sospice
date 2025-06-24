@@ -4,8 +4,8 @@ import astropy.units as u
 import numpy as np
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
-
-from sunraster.meta import Meta, SlitSpectrographMetaABC
+from ndcube.meta import NDMeta
+from sunraster.meta import SlitSpectrographMetaABC
 
 __all__ = ["SPICEMeta"]
 
