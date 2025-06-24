@@ -1,0 +1,1 @@
+Update minimum required versions of ndcube to 2.3.2 and sunraster to 0.6.
