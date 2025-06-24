@@ -58,7 +58,7 @@ def read_spice_l2_fits(filenames, windows=None, memmap=True, read_dumbbells=Fals
     if len(filenames) > 1:
         # Wrap windows from first file in lists
         # so windows from other files can be appended.
-        cube_lists = dict([(key, [value]) for key, value in first_cubes.items()])
+        cube_lists = {key: [value] for key, value in first_cubes.items()}
         # Get info from first file for consistency checks between files.
         first_meta = _get_meta_from_last_added(cube_lists)
         first_obs_id = _get_obsid(first_meta)
@@ -75,7 +75,7 @@ def read_spice_l2_fits(filenames, windows=None, memmap=True, read_dumbbells=Fals
                     output=cube_lists,
                     spice_id=first_obs_id,
                 )
-            except ValueError as err:
+            except ValueError as err:  # NOQA: PERF203
                 err_message = err.args[0]
                 if INCORRECT_OBSID_MESSAGE in err_message:
                     this_obs_id = err_message.split()[-1]
@@ -103,7 +103,9 @@ def read_spice_l2_fits(filenames, windows=None, memmap=True, read_dumbbells=Fals
         first_sequence = window_sequences[0][1]
         first_spectral_window = first_sequence[0].meta.spectral_window
         if all(window[1][0].meta.spectral_window == first_spectral_window for window in window_sequences):
-            aligned_axes = tuple(range(len(first_sequence.dimensions)))
+            aligned_axes = tuple(
+                range(len(first_sequence.shape if hasattr(first_sequence, "shape") else first_sequence.dimensions))
+            )
         else:
             aligned_axes = tuple(
                 i for i, phys_type in enumerate(first_sequence.array_axis_physical_types) if "em.wl" not in phys_type
@@ -210,7 +212,7 @@ def _read_single_spice_l2_fits(
                 # Define metadata object.
                 meta = SPICEMeta(
                     hdu.header,
-                    comments=_convert_fits_comments_to_key_value_pairs(hdu.header),
+                    key_comments=_convert_fits_comments_to_key_value_pairs(hdu.header),
                     data_shape=hdu.data.shape,
                 )
                 # Rename WCS time axis to time.
@@ -243,4 +245,4 @@ def _read_single_spice_l2_fits(
 def _convert_fits_comments_to_key_value_pairs(fits_header):
     keys = np.unique(np.array(list(fits_header.keys())))
     keys = keys[keys != ""]
-    return [(key, fits_header.comments[key]) for key in keys]
+    return dict([(key, fits_header.comments[key]) for key in keys])

@@ -10,10 +10,10 @@ from sunraster.meta import Meta, SlitSpectrographMetaABC
 __all__ = ["SPICEMeta"]
 
 
-class SPICEMeta(Meta, metaclass=SlitSpectrographMetaABC):
+class SPICEMeta(SlitSpectrographMetaABC, NDMeta):
     # ---------- SPICE-specific convenience methods ----------
     def _get_unit(self, key):
-        if comment := self.comments.get(key):
+        if comment := self.key_comments.get(key):
             try:
                 return [s.split("]") for s in comment.split("[")[1:]][0][:-1][0]
             except IndexError:
@@ -49,7 +49,7 @@ class SPICEMeta(Meta, metaclass=SlitSpectrographMetaABC):
         )
 
     def __repr__(self):
-        return f"{object.__repr__(self)}\n{str(self)}"
+        return f"{object.__repr__(self)}\n{self!s}"
 
     # ---------- Inherited ABC properties ----------
     @property
