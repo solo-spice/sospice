@@ -1,9 +1,11 @@
 import pytest
 from datetime import datetime
 import pandas as pd
-
+import astropy.units as u
 
 from ..catalog import Catalog
+from ..file_metadata import FileMetadata
+
 
 
 @pytest.fixture
@@ -147,6 +149,28 @@ class TestCatalog:
         assert result.FILENAME == expected_filename
         result = catalog2.find_file_closest_to_date(None)
         assert result.empty
+
+    def test_find_file_by_wavelength(self, catalog3):
+        expected_filename = "solo_L2_spice-n-exp_20211010T000110_V03_83886152-000.fits"
+        wl = 70.8 * u.nm
+        wl2 = 10 * u.nm
+        wlA = wl.to(u.AA)
+        result = catalog3.find_files_by_wavelength(wavelength=wl)
+        assert len(result) == 23371
+        result = catalog3.find_files_by_wavelength(wl)
+        assert len(result) == 23371
+        result = catalog3.find_files_by_wavelength(wl2)
+        assert result.empty
+        result = catalog3.find_files_by_wavelength(wlA)
+        assert len(result) == 23371
+
+        #closest to date
+        result = catalog3.find_files_by_wavelength(wl)
+        result = result.find_file_closest_to_date("2021-10-10")
+        assert result.FILENAME == expected_filename
+
+        assert wl in FileMetadata(result).get_wavelengths()
+
 
     def test_find_files(self, catalog2):
         result = Catalog().find_files()
