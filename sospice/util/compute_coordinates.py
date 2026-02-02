@@ -9,7 +9,8 @@ from sunpy.coordinates import frames
 from sunpy.physics.differential_rotation import diff_rot
 from astropy.coordinates import SkyCoord
 from astropy.wcs import WCS
-
+from sunpy.sun.models import differential_rotation
+from astropy.constants import R_sun
 
 
 """
@@ -30,9 +31,12 @@ def _get_spatial_wcs(header):
     w : wcs.WCS
         Spatial WCSa.
     """
+
     w = wcs.WCS(header)
+       
     w.wcs.pc[3, 0] = 0  # remove PC4_1 to decouple t from x
     return w.sub(2)  # drop wavelength and time axes
+    
 
 
 def _assert_hdus_have_the_same_spatial_coordinates(hdul):
@@ -78,6 +82,8 @@ def get_coordinates(header):
     iy, ix = np.indices((header['NAXIS2'], header['NAXIS1']))
     iD = np.zeros_like(ix)  
     it = np.zeros_like(ix)  
+    
+    
     outputs = w.pixel_to_world(ix, iy, iD, it)
     Tx = outputs[0].Tx.arcsec
     Ty = outputs[0].Ty.arcsec
@@ -111,115 +117,94 @@ def add_distortion_to_coordinates(coordinates, hdul):
     return np.array([Tx - Tx_corr, Ty - Ty_corr])
 
 
-def spice_diff_rot_coord(coordinates, header,
-                         tracking=False,
-                         target_header=None):
+
+
+def spice_diff_rot_coord(coordinates, header, hpc, observer, target_header = None):
     """
-    Apply solar differential rotation to helioprojective coordinates (arcsec),
-    from $SSW/so/spice/idl/quicklook/utils/spice_diff_rot_coord.pro
+    Apply solar differential rotation to helioprojective coordinates
 
     Parameters
     ----------
     coordinates : np.ndarray
-        Shape (2, ny, nx), array of [Tx, Ty] in arcsec
+        Shape (2, ny, nx), array of [Tx, Ty] in arcsec (helioprojective)
     header : fits.Header
-        Header defining the WCS (HPC + time axis).
-        Should contain DATE-OBS (and ideally DATE-AVG or DATEREF/EXPTIME).
-    tracking : bool, optional
-        If True, use the average time only (equivalent to IDL /TRACKING branch).
+        Header defining the WCS (HPC + time axis). Should contain DATEREF or DATE-OBS
     target_header : fits.Header, optional
-        If given, final coordinates are converted into this WCS/time (like TARGET_WCS).
-        Otherwise stays in the same WCS as `header`.
+        If given, final coordinates are converted into this WCS/time.
 
     Returns
     -------
     np.ndarray
         Shape (2, ny, nx), corrected [Tx, Ty] in arcsec at the target time/WCS.
     """
-    Tx, Ty = coordinates
+
+    Tx = coordinates.Tx.to(u.arcsec).value
+    Ty = coordinates.Ty.to(u.arcsec).value
     ny, nx = Tx.shape
 
-    # Times (IDL: dateref vs observ_avg)
-    # Reference date (DATEREF if present, else DATE-OBS)
-    dateref = header.get('DATEREF', header.get('DATE-OBS'))
+
+    # Reference date
+    #dateref = header.get('DATEREF', header.get('DATE-OBS'))
+    dateref = header.get('DATE-BEG')
     if dateref is None:
         raise ValueError("Header must contain DATEREF or DATE-OBS")
 
-    # Average/target time: DATE-AVG preferred, else DATE-OBS
-    date_avg = header.get('DATE-AVG', header.get('DATE-OBS'))
+    # average/target time default
+    #date_avg = header.get('DATE-AVG', header.get('DATE-OBS'))
+    date_avg = header.get('DATE-BEG')
     if date_avg is None:
         raise ValueError("Header must contain DATE-AVG or DATE-OBS")
-
     t_avg = Time(date_avg)
 
+    # build WCS 
     w_in = WCS(header)
     iy, ix = np.indices((ny, nx))
-    # dummy indices for the other axes (D and t index)
-    iD = np.zeros_like(ix)
-    it = np.zeros_like(ix)
+    iD = np.zeros_like(ix)   #  wavelength 
+    it = np.zeros_like(ix)   #  time 
 
-    # Get time component
+    # Build Nx4 pixel array and map to world
     pix_stack = np.stack([ix, iy, iD, it], axis=-1).reshape(-1, 4)
-    world = w_in.wcs_pix2world(pix_stack, 0)  # shape (N, 4): [Tx, Ty, ?, time]
+    # wcs_pix2world returns an (N,4) array of world values 
+    world = w_in.wcs_pix2world(pix_stack, 0)  
     t_ref = Time(dateref)
-    # Interpret the 4th world component as seconds from DATEREF:
-    seconds_from_ref = world[:, -1]
+    seconds_from_ref = world[:, -1] 
     times_flat = t_ref + seconds_from_ref * u.s
     times = times_flat.reshape(ny, nx)
 
-    # IDL: tracking => tai = tai0 (single time), else use full per-pixel time array.
-    if tracking:
-        tai = np.full((ny, nx), t_avg)
+    # target time for rotation
+    if target_header is None:
+        target_time = t_avg
     else:
-        tai = times 
+        target_time = Time(target_header.get('DATE-AVG', target_header.get('DATE-OBS', date_avg)))
 
 
-    # Time difference in days (IDL: dd)
-    target_time = t_avg if target_header is None else Time(target_header.get('DATE-AVG',
-                                        target_header.get('DATE-OBS', date_avg)))
-    dd_days = (target_time - tai).to(u.day).value
-    # If dd==0 everywhere, nothing to do
+    dd_days = (target_time - times).to(u.day).value
     if np.all(dd_days == 0):
         return np.array([Tx, Ty])
 
-    # Convert HPC -> Heliographic Carrington (lon, lat in degrees) 
-    # Build HPC SkyCoord for each pixel at *its own time* (tai) with proper observer.
+    # Convert HPC -> HelioCarrington (lon,lat)
     Tx_q = (Tx * u.arcsec).reshape(ny, nx)
     Ty_q = (Ty * u.arcsec).reshape(ny, nx)
 
-    # Get Solar Orbiter location 
-    observer = observer_from_header(header)
 
-    Tx_flat = Tx_q.ravel()
-    Ty_flat = Ty_q.ravel()
-    times_flat = times_flat.ravel()  
+    times_flat = times_flat.ravel() 
 
-    # Create SkyCoord with array obstime
-    hpc = SkyCoord(
-        Tx_flat, Ty_flat,
-        frame=frames.Helioprojective,
-        obstime=times_flat,
-        observer=observer
-    )
+    # radius 
+    rad = R_sun * 1.005
 
+    
     # Transform to Carrington
-    hgcrs = hpc.transform_to(frames.HeliographicCarrington(obstime=times_flat))
+    hgcrs = hpc.transform_to(frames.HeliographicCarrington())
 
-    # Reshape back to 2D
+
     lon_deg = hgcrs.lon.to(u.deg).value.reshape(ny, nx)
     lat_deg = hgcrs.lat.to(u.deg).value.reshape(ny, nx)
 
-
     # Apply differential rotation 
-    # sunpy.diff_rot expects dd in days and lat in degrees; returns degrees.
-    
-    drot_deg = diff_rot(dd_days*u.day, lat_deg*u.deg,
-                        frame_time='carrington',  # matches /carrington
-                        ).to(u.deg).value
+    drot_deg = differential_rotation(dd_days * u.day,lat_deg * u.deg).to(u.deg).value
+    lon_deg = lon_deg + drot_deg 
 
-    lon_deg = lon_deg + drot_deg
-
-    # Fix latitudes beyond [-90, 90]
+    # Correct any latitudes that go beyond -90 to +90
     w_over = lat_deg > 90.0
     if np.any(w_over):
         lat_deg[w_over] = 180.0 - lat_deg[w_over]
@@ -230,23 +215,20 @@ def spice_diff_rot_coord(coordinates, header,
         lat_deg[w_under] = -180.0 - lat_deg[w_under]
         lon_deg[w_under] = lon_deg[w_under] + 180.0
 
-    # Convert back to HPC at target time/WCS 
-    w_out = WCS(header if target_header is None else target_header)
-    # Build HG Carrington SkyCoord at target_time
-    hgcrs_new = SkyCoord(
-        lon=lon_deg*u.deg,
-        lat=lat_deg*u.deg,
-        frame=frames.HeliographicCarrington,
-        obstime=target_time,
-        observer=observer  
-    )
-    
-    # Convert to HPC at target_time with the output WCS's observer if available
-    hpc_out = hgcrs_new.transform_to(frames.Helioprojective(observer=observer, obstime=target_time))
-    Tx_new = hpc_out.Tx.to(u.arcsec).value
-    Ty_new = hpc_out.Ty.to(u.arcsec).value
+    # Convert back to HPC at target_time
+    hgcrs_new = SkyCoord(lon=lon_deg * u.deg,
+                        lat=lat_deg * u.deg,
+                        radius=rad,
+                        frame=frames.HeliographicCarrington,
+                        observer=observer)
 
-    # Only update finite (on-disk) values
+    hpc_out = hgcrs_new.transform_to(frames.Helioprojective(observer=observer))
+
+
+
+    Tx_new = hpc_out.Tx.to(u.arcsec).value.reshape(ny, nx)
+    Ty_new = hpc_out.Ty.to(u.arcsec).value.reshape(ny, nx)
+
     finite = np.isfinite(Tx_new) & np.isfinite(Ty_new)
     Tx_corr = Tx.copy()
     Ty_corr = Ty.copy()
@@ -254,33 +236,3 @@ def spice_diff_rot_coord(coordinates, header,
     Ty_corr[finite] = Ty_new[finite]
 
     return np.array([Tx_corr, Ty_corr])
-
-
-
-
-
-def get_earth_observer(header):
-    obstime = Time(header['DATE-OBS'])
-
-    return SkyCoord(
-        lon=0*u.deg, lat=0*u.deg, radius=1*u.AU,
-        frame=frames.HeliographicStonyhurst,
-        obstime=Time(obstime)
-    )
-
-def observer_from_header(header):
-    """
-    Build a SkyCoord observer location from FITS WCS keywords.
-    """
-    dsun = header.get("DSUN_OBS") * u.m     # Sun-observer distance
-    lon  = header.get("CRLN_OBS") * u.deg   # Carrington longitude
-    lat  = header.get("CRLT_OBS") * u.deg   # Carrington latitude
-    obstime = Time(header.get("DATE-OBS"))
-
-    observer_hgs = SkyCoord(lon, lat, dsun,
-                        frame=frames.HeliographicStonyhurst,
-                        obstime=obstime)
-
-    return observer_hgs
-
-
