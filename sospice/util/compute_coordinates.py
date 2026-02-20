@@ -119,39 +119,38 @@ def add_distortion_to_coordinates(coordinates, hdul):
 
 
 
-def spice_diff_rot_coord(coordinates, header, hpc, observer, target_header = None):
+def spice_diff_rot_coord(header, hpc, observer, radius_S = 1.05, target_header = None):
     """
     Apply solar differential rotation to helioprojective coordinates
 
     Parameters
     ----------
-    coordinates : np.ndarray
-        Shape (2, ny, nx), array of [Tx, Ty] in arcsec (helioprojective)
     header : fits.Header
         Header defining the WCS (HPC + time axis). Should contain DATEREF or DATE-OBS
+    hpc : SkyCoord of helioprojective coordinates
+        coordinates link to the header, rotation will be added on those
+    observer : observer for the WCS
+    radius_S : ratio of the radius "center of the sun -> photosphere" matching the observed data 
+        (around 1.04 for the chromosphere)
     target_header : fits.Header, optional
         If given, final coordinates are converted into this WCS/time.
 
     Returns
     -------
-    np.ndarray
-        Shape (2, ny, nx), corrected [Tx, Ty] in arcsec at the target time/WCS.
+    hpc_out
+        SkyCoord of helioprojective coordinates, corrected [Tx, Ty] at the target time/WCS.
     """
 
-    Tx = coordinates.Tx.to(u.arcsec).value
-    Ty = coordinates.Ty.to(u.arcsec).value
-    ny, nx = Tx.shape
-
+    ny, nx = hpc.Tx.shape
 
     # Reference date
-    #dateref = header.get('DATEREF', header.get('DATE-OBS'))
     dateref = header.get('DATE-BEG')
     if dateref is None:
-        raise ValueError("Header must contain DATEREF or DATE-OBS")
+        raise ValueError("Header must contain DATE-BEG")
 
     # average/target time default
-    #date_avg = header.get('DATE-AVG', header.get('DATE-OBS'))
-    date_avg = header.get('DATE-BEG')
+    date_avg = header.get('DATE-AVG', header.get('DATE-OBS'))
+    #date_avg = header.get('DATE-BEG')
     if date_avg is None:
         raise ValueError("Header must contain DATE-AVG or DATE-OBS")
     t_avg = Time(date_avg)
@@ -165,7 +164,7 @@ def spice_diff_rot_coord(coordinates, header, hpc, observer, target_header = Non
     # Build Nx4 pixel array and map to world
     pix_stack = np.stack([ix, iy, iD, it], axis=-1).reshape(-1, 4)
     # wcs_pix2world returns an (N,4) array of world values 
-    world = w_in.wcs_pix2world(pix_stack, 0)  
+    world = w_in.wcs_pix2world(pix_stack, 0)
     t_ref = Time(dateref)
     seconds_from_ref = world[:, -1] 
     times_flat = t_ref + seconds_from_ref * u.s
@@ -180,25 +179,17 @@ def spice_diff_rot_coord(coordinates, header, hpc, observer, target_header = Non
 
     dd_days = (target_time - times).to(u.day).value
     if np.all(dd_days == 0):
-        return np.array([Tx, Ty])
-
-    # Convert HPC -> HelioCarrington (lon,lat)
-    Tx_q = (Tx * u.arcsec).reshape(ny, nx)
-    Ty_q = (Ty * u.arcsec).reshape(ny, nx)
-
-
-    times_flat = times_flat.ravel() 
+        return hpc
 
     # radius 
-    rad = R_sun * 1.005
-
+    rad = R_sun * radius_S
     
     # Transform to Carrington
-    hgcrs = hpc.transform_to(frames.HeliographicCarrington())
+    hgcrs = hpc.transform_to(frames.HeliographicCarrington(observer=observer))
 
 
-    lon_deg = hgcrs.lon.to(u.deg).value.reshape(ny, nx)
-    lat_deg = hgcrs.lat.to(u.deg).value.reshape(ny, nx)
+    lon_deg = hgcrs.lon.to(u.deg).value
+    lat_deg = hgcrs.lat.to(u.deg).value
 
     # Apply differential rotation 
     drot_deg = differential_rotation(dd_days * u.day,lat_deg * u.deg).to(u.deg).value
@@ -215,7 +206,7 @@ def spice_diff_rot_coord(coordinates, header, hpc, observer, target_header = Non
         lat_deg[w_under] = -180.0 - lat_deg[w_under]
         lon_deg[w_under] = lon_deg[w_under] + 180.0
 
-    # Convert back to HPC at target_time
+    # Convert back to HPC
     hgcrs_new = SkyCoord(lon=lon_deg * u.deg,
                         lat=lat_deg * u.deg,
                         radius=rad,
@@ -225,14 +216,4 @@ def spice_diff_rot_coord(coordinates, header, hpc, observer, target_header = Non
     hpc_out = hgcrs_new.transform_to(frames.Helioprojective(observer=observer))
 
 
-
-    Tx_new = hpc_out.Tx.to(u.arcsec).value.reshape(ny, nx)
-    Ty_new = hpc_out.Ty.to(u.arcsec).value.reshape(ny, nx)
-
-    finite = np.isfinite(Tx_new) & np.isfinite(Ty_new)
-    Tx_corr = Tx.copy()
-    Ty_corr = Ty.copy()
-    Tx_corr[finite] = Tx_new[finite]
-    Ty_corr[finite] = Ty_new[finite]
-
-    return np.array([Tx_corr, Ty_corr])
+    return hpc_out
