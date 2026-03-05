@@ -5,6 +5,8 @@ from itertools import cycle
 import matplotlib.colors as mcolors
 import pandas as pd
 import numpy as np
+import astropy.units as u
+
 
 from astropy.utils.data import download_file
 
