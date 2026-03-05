@@ -6,9 +6,7 @@ import numpy as np
 from astropy.time import Time
 
 from sunpy.coordinates import frames
-from sunpy.physics.differential_rotation import diff_rot
 from astropy.coordinates import SkyCoord
-from astropy.wcs import WCS
 from sunpy.sun.models import differential_rotation
 from astropy.constants import R_sun
 
@@ -130,8 +128,8 @@ def spice_diff_rot_coord(header, hpc, observer, radius_S = 1.05, target_header =
     hpc : SkyCoord of helioprojective coordinates
         coordinates link to the header, rotation will be added on those
     observer : observer for the WCS
-    radius_S : ratio of the radius "center of the sun -> photosphere" matching the observed data 
-        (around 1.04 for the chromosphere)
+    radius_S : ratio of the radius (1 being "center of the sun -> photosphere") matching the observed data 
+        (around 1.04/1.05 for the chromosphere)
     target_header : fits.Header, optional
         If given, final coordinates are converted into this WCS/time.
 
@@ -150,13 +148,12 @@ def spice_diff_rot_coord(header, hpc, observer, radius_S = 1.05, target_header =
 
     # average/target time default
     date_avg = header.get('DATE-AVG', header.get('DATE-OBS'))
-    #date_avg = header.get('DATE-BEG')
     if date_avg is None:
         raise ValueError("Header must contain DATE-AVG or DATE-OBS")
     t_avg = Time(date_avg)
 
     # build WCS 
-    w_in = WCS(header)
+    w_in = wcs.WCS(header)
     iy, ix = np.indices((ny, nx))
     iD = np.zeros_like(ix)   #  wavelength 
     it = np.zeros_like(ix)   #  time 
