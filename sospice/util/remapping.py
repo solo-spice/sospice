@@ -79,7 +79,6 @@ def remap_spice_hdu(hdu, points, new_points, sum_wvl=False):
             new_hdu.data[it, iD] = new_img
 
     new_hdu.update_header()
-    new_hdu.header.add_history('jitter_correction.py')
     new_hdu.add_datasum()
     new_hdu.add_checksum()
     return new_hdu

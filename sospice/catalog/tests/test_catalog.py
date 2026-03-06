@@ -2,7 +2,6 @@ import pytest
 from datetime import datetime
 import pandas as pd
 
-
 from ..catalog import Catalog
 
 
