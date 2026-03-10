@@ -23,7 +23,7 @@ def spice_error(hdu=None, data=None, header=None, verbose=True):
     float:
         Average contribution of dark current and background to measured signal
     dict:
-        Noise standard deviations for the different components (and total)
+        Noise standard deviations for the different components (and total), in in W / m2 / sr / nm
 
     Either hdu, or data and header should be provided.
 

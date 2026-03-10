@@ -129,7 +129,7 @@ You can then push changes to GitHub:
     git push origin my-new-feature
 
 Once you see the changes in GitHub, create a `pull request <https://docs.github.com/en/pull-requests>`__
-against the main ``sospice`` repository.
+against the ``develop`` branch of the main ``sospice`` repository.
 Others will likely have comments and suggestions regarding your proposed changes.
 You can make these changes using the instructions listed above.
 

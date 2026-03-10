@@ -176,7 +176,7 @@ class FileMetadata:
         return Path(filename)
 
     def download_file(
-        self, base_dir, base_url=None, release=None, keep_tree=True, downloader=None
+        self, base_dir=".", base_url=None, release=None, keep_tree=True, downloader=None
     ):
         """
         Download file, from a release, from some other online file tree,
@@ -215,7 +215,7 @@ class FileMetadata:
         if do_download:
             result = downloader.download()
             return result
-        return None
+        return
 
     def get_wavelengths(self):
         """
@@ -345,6 +345,18 @@ class FileMetadata:
         )
         return observer
 
+    def mid_time(self):
+        """
+        Find "middle time" for observation
+
+        Return
+        ----------
+        pd.Timestamp
+            The middle time of the observation.
+        """
+        date_beg = self.metadata["DATE-BEG"]
+        return date_beg + pd.Timedelta(seconds=self.metadata["TELAPSE"] / 2)
+
     def get_fov(self, points=None, method=None):
         """
         Get the FOV coordinates (bottom left and top right vertices of rectangle
@@ -414,6 +426,7 @@ class FileMetadata:
             'points' and 'method' are passed to FileMetadata.get_fov(),
             other arguments are passed to ax.plot_coords()
         """
+
         fov_args = dict()
         for k in ["points", "method"]:
             fov_args[k] = kwargs.pop(k, None)
@@ -426,9 +439,13 @@ class FileMetadata:
                     continue
                 kwargs[key] = self.metadata[index]
         ax.plot_coord(fov_coords, **kwargs)
-        if "fov_text" in self.metadata.index:
-            text_args = [fov_coords[0], self.metadata.fov_text]
-            text_kwargs = {"rotation": "vertical", "ha": "right"}
+
+        if "fov_textlabel" in self.metadata.index:
+            text_args = [fov_coords[0], self.metadata.fov_textlabel]
+            # text_kwargs = {"rotation": "vertical", "ha": "right"}
+            text_kwargs = {"rotation": 0, "ha": "right", "fontsize": 25}
+            # text_kwargs = {"rotation": 0, "ha": "right"}
+
             if "fov_color" in self.metadata.index:
                 text_kwargs["color"] = self.metadata.fov_color
             if "text_coord" in dir(ax):  # astropy ≥ 6
