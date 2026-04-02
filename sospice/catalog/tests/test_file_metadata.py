@@ -7,10 +7,10 @@ import shutil
 
 import astropy.units as u
 from astropy.coordinates import SkyCoord
-from sunpy.coordinates import Helioprojective
+from sunpy.coordinates import Helioprojective, HeliographicCarrington
 
 from ..file_metadata import FileMetadata
-from .test_catalog import catalog2, catalog3  # noqa: F401
+from .test_catalog import catalog2, catalog3, catalog5  # noqa: F401
 from .test_release import release2  # noqa: F401
 
 
@@ -68,11 +68,12 @@ class TestFileMetadata:
             base_dir, release=release2, keep_tree=False
         )
         assert len(result) == 1
-        assert result[0] == (base_dir / filename).as_posix()
+        assert Path(result[0]) == (base_dir / filename)#.as_posix()
         result = file_metadata.download_file(base_dir, release=release2)
-        expected = (base_dir / file_metadata.metadata.FILE_PATH / filename).as_posix()
+        #expected = (base_dir / file_metadata.metadata.FILE_PATH / filename).as_posix()
+        expected = base_dir / file_metadata.metadata.FILE_PATH / filename
         assert len(result) == 1
-        assert result[0] == expected
+        assert Path(result[0]) == expected
         downloader = Downloader(overwrite=False)
         result = file_metadata.download_file(  # noqa: F841
             base_dir, release=release2, downloader=downloader
@@ -134,3 +135,77 @@ class TestFileMetadata:
         assert fov.observer == observer
         assert u.isclose(fov[0].Tx, expected_top_left.Tx)
         assert u.isclose(fov[0].Ty, expected_top_left.Ty)
+
+    def test_point_in_fov(self, catalog5):
+        # load file
+
+        row = catalog5[catalog5.FILENAME == "solo_L2_spice-n-ras_20240313T000032_V22_251658278-000.fits"]
+
+        fm = FileMetadata(row)
+
+        # carrington point
+        t = "2024-03-13T01:20:52.650"
+        observer = fm.get_observer()
+
+        p1 = SkyCoord(
+            320.02*u.deg,
+            -12.80*u.deg,
+            frame=HeliographicCarrington,
+            observer=observer,
+            obstime=t
+        )
+
+        p2 = SkyCoord(
+            338.58*u.deg,
+            -4.70*u.deg,
+            frame=HeliographicCarrington,
+            observer=observer,
+            obstime=t
+        )
+
+        # test FOV
+        p1B = fm.point_in_fov(p1)
+        p2B = fm.point_in_fov(p2)
+        
+        assert not p1B
+        assert p2B
+
+        # test fov with time
+        t = "2024-03-13T01:20:52.650"
+
+        p1Bt = fm.point_in_fov(p1, time=t)
+        p2Bt = fm.point_in_fov(p2, time=t)
+        
+        assert not p1Bt
+        assert p2Bt
+
+        # test from hpc directly
+
+        observer = fm.get_observer()
+
+        p1_hpc = SkyCoord(-730*u.arcsec, -224*u.arcsec,
+                        frame=Helioprojective,
+                        observer=observer,
+                        obstime="2024-03-13T01:20:52.650")
+
+        p2_hpc = SkyCoord(-182*u.arcsec, 49*u.arcsec,
+                        frame=Helioprojective,
+                        observer=observer,
+                        obstime="2024-03-13T01:20:52.650")
+
+        p1Bh = fm.point_in_fov(p1_hpc)
+        p2Bh = fm.point_in_fov(p2_hpc)
+
+        assert not p1Bh
+        assert p2Bh
+
+        # border
+        p1_hpc = SkyCoord(-378*u.arcsec, -1540*u.arcsec,
+                        frame=Helioprojective,
+                        observer=observer,
+                        obstime="2024-03-13T01:20:52.650")
+        p1Bh = fm.point_in_fov(p1_hpc)
+        assert not p1Bh
+
+
+
