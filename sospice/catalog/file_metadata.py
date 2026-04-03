@@ -5,6 +5,8 @@ import warnings
 import numpy as np
 import pandas as pd
 import portion
+from matplotlib import path
+from astropy.time import Time
 
 from parfive import Downloader
 from astropy.utils.data import download_file
@@ -455,3 +457,58 @@ class FileMetadata:
                     *text_args, **text_kwargs
                 )
                 ax.text(*text_args, **text_kwargs)
+
+    def point_in_fov(self, point: SkyCoord, time=None):
+        """
+        Test whether a point is inside the SPICE FOV.
+
+        Parameters
+        ----------
+        point : SkyCoord
+            Coordinates of the point to check.
+        time : str, datetime-like, astropy.time.Time, optional
+            Time at which the coordinate should be evaluated.
+            If None, the observation mid-time (DATE-AVG) is used.
+
+        Returns
+        -------
+        bool
+            True if the point is inside the FOV, False otherwise.
+        """
+
+        # Determine time
+        if time is None:
+            time = Time(self.mid_time())
+        else:
+            time = Time(time)
+
+        # Observer of the observation
+        observer = self.get_observer()
+
+        # HPC frame of the observation
+        frame = Helioprojective(
+            observer=observer,
+            obstime=time
+        )
+
+        # Convert input point to this HPC frame
+        point_hpc = point.transform_to(frame)
+
+        # Get FOV coordinates
+        fov = self.get_fov(points=2)
+        fov = fov.transform_to(frame)
+
+        # Build polygon
+        poly = np.vstack([
+            fov.Tx.to(u.arcsec).value,
+            fov.Ty.to(u.arcsec).value
+        ]).T
+
+        pt = [
+            point_hpc.Tx.to(u.arcsec).value,
+            point_hpc.Ty.to(u.arcsec).value
+        ]
+
+        pathP = path.Path(poly)
+
+        return bool(pathP.contains_point(pt))

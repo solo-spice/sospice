@@ -23,6 +23,9 @@ def filename():
 def catalog3():
     return Catalog(release_tag="3.0")
 
+@pytest.fixture
+def catalog5():
+    return Catalog(release_tag="5.0")
 
 @pytest.fixture
 def catalog_latest():
@@ -215,8 +218,8 @@ class TestCatalog:
         assert len(result) == max_download
 
         if len(result) > 0:
-            expected_first_file_path = (base_dir / result[0].split("/")[-1]).as_posix()
-            assert result[0] == expected_first_file_path
+            expected_first_file_path = base_dir / Path(result[0]).name
+            assert Path(result[0]) == expected_first_file_path
 
         downloader = Downloader(overwrite=False)
         catalog2.download_files(
