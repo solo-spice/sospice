@@ -8,21 +8,13 @@ import pandas as pd
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 
-import sunpy
-from sunpy.map import Map
+from sunpy.map import Map, make_fitswcs_header
 from sunpy.coordinates import frames
 from sunpy.coordinates.sun import carrington_rotation_number
 from sunpy.net import Fido, attrs
 import sunpy_soar  # noqa: F401
 
 from ..catalog import Catalog, FileMetadata
-
-
-# set global figure fontsize parameters
-plt.rcParams["axes.labelsize"] = "xx-large"
-plt.rcParams["axes.titlesize"] = "xx-large"
-plt.rcParams["xtick.labelsize"] = "x-large"
-plt.rcParams["ytick.labelsize"] = "x-large"
 
 
 def _show_or_save(fig, ax, show, save):
@@ -169,12 +161,10 @@ class FovBackground:
         matplotlib.axes.Axes
             Axes (with relevant projection)
         """
-        # raise NotImplementedError("Blank map background not implemented yet")
         data = np.full((10, 10), np.nan)
 
         obs_heligraphic_sth = self.observer
         obstime = self.observer.obstime
-        # obs_helioprojective=obs_heligraphic_sth.transform_to(frames.Helioprojective)
 
         skycoord = SkyCoord(
             0 * u.arcsec,
@@ -183,10 +173,10 @@ class FovBackground:
             observer=obs_heligraphic_sth,
             frame=frames.Helioprojective,
         )
-        header = sunpy.map.make_fitswcs_header(
+        header = make_fitswcs_header(
             data, skycoord, scale=[1000, 1000] * u.arcsec / u.pixel
         )
-        blank_map = sunpy.map.Map(data, header)
+        blank_map = Map(data, header)
 
         # fig = plt.figure()
         fig = plt.figure(figsize=(20, 10))
