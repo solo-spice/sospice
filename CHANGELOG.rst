@@ -1,3 +1,16 @@
+0.0.9 (2026-05-09)
+==================
+
+New Features
+------------
+
+- EUI/FSI background image for FOV plots is cached in user's directory. Also, the target time and
+  tolerance for finding this background image can now be set by the user. (`#47 <https://github.com/solo-spice/sospice/pull/47>`__)
+- Compute mid-time for a SPICE observation. (`#54 <https://github.com/solo-spice/sospice/pull/54>`__)
+- All files from a SPICE catalog can be downloaded at once (up to a user-defined maximum number of files). (`#57 <https://github.com/solo-spice/sospice/pull/57>`__)
+- Implement SPICE colormaps depending on temperature. (`#72 <https://github.com/solo-spice/sospice/pull/72>`__)
+
+
 0.0.8 (2024-02-02)
 ==================
 

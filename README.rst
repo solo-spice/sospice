@@ -20,6 +20,7 @@ Orbiter <http://sci.esa.int/solar-orbiter/>`__ mission.
 A generic SPICE data analysis user’s manual (including Python and IDL
 tips) is available `on the IAS
 wiki <https://spice-wiki.ias.u-psud.fr/doku.php/data:data_analysis_manual>`__.
+SPICE L2 FITS files can also be viewed in the `SPICE IT UP <https://pypi.org/project/spiceitup/>`__ quicklook tool.
 
 ``sospice`` is intended to be a simple way of accessing all necessary
 instrument-specific functionalities required for day-to-day SPICE data analysis,
@@ -39,25 +40,25 @@ Documentation for this package is available on `Read the Docs <https://sospice.r
 
 -  Calibration: ``calibrate``
 
-   -  ``spice_error``: Computation of uncertainties on data, coming from
-      different noise components.
+   - ``spice_error``: Computation of uncertainties on data, coming from
+     different noise components.
 
-- Catalog: ``catalog``
+-  Catalog: ``catalog``
 
-   -  ``Catalog``: access and read catalog, find files in catalog.
-   -  ``Release``: find and access releases.
-   -  ``FileMetadata``: file metadata and download.
+   - ``Catalog``: access and read catalog, find files in catalog.
+   - ``Release``: find and access releases.
+   - ``FileMetadata``: file metadata and download.
 
 -  Instrument modelling: ``instrument_modelling``
 
-   -  ``Spice``: instrument calibration parameters, effective area,
-      quantum efficiency...
-   -  ``Study``: study parameters.
-   -  ``Observation``: a SPICE observation with some study (including
-      low-level functions used to compute the uncertainties on the
-      data).
+   - ``Spice``: instrument calibration parameters, effective area,
+     quantum efficiency...
+   - ``Study``: study parameters.
+   - ``Observation``: a SPICE observation with some study (including
+     low-level functions used to compute the uncertainties on the
+     data).
 
-- Other utilities: ``util``
+-  Other utilities: ``util``
 
    - ``sigma_clipping``: sigma clipping (for cosmic rays removal).
    - ``fov``: plot SPICE field-of-views on a background map.
@@ -89,4 +90,4 @@ requests <https://github.com/solo-spice/sospice/pulls>`__.
 Citation
 --------
 
-See the `citation <sospice/CITATION.rst>`__ file.
+See the `citation <https://github.com/solo-spice/sospice/blob/main/sospice/CITATION.rst>`__ file.

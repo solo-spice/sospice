@@ -82,22 +82,25 @@ The file can then be put at any location on disk (optionally keeping the origina
 
 .. code-block:: python
 
-   metadata.download_file()  # no argument → download from SOAR
+   metadata.download_file()
+   # no argument → download from SOAR, to current directory
 
-These downloads are internally managed using the ``parfive`` package, this provides the option to enqueue different files for download, and then to run the downloads in parallel. This example shows how to download the files corresponding to the first 10 rows of ``results`` from release 2.0 (from which the catalog has been extracted):
+In the same way, it is possible to download files from a ``Catalog`` object (usually a selection of rows of a data release, not a full data release!). There is a limit of number of files to be downloaded, ``max_download``, that can be overridden if necessary.
+
+.. code-block:: python
+
+   catalog.download_files()
+
+These downloads are internally managed using the ``parfive`` package, this provides the option to enqueue files before launching the (parallel) download of these files.
+
+This example shows how to download the files corresponding to two different ``Catalog`` objects:
 
 .. code-block:: python
 
    from parfive import Downloader
    downloader = Downloader()
-   result.iloc[:10].apply(
-      lambda row: FileMetadata(row).download_file(
-         "/tmp/spice-files",  # base directory
-         release="2.0",
-         downloader=downloader
-      ),
-      axis=1
-   )
+   cat1.download_files()
+   cat2.download_files()
    downloader.download()
 
 In any case, files are not re-downloaded if they already exist (please remove them before re-downloading them if an update is really necessary); released files should never be modified anyways (although there will probably be newer versions in the following releases).

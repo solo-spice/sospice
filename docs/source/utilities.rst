@@ -38,4 +38,6 @@ or with EUI/FSI data
 
     plot_fovs_with_background(observations, "EUI/FSI")
 
+Other options can be used to customize the plots (please see the function docstring for details). In particular, the ``time`` argument can be used to specify a different reference time for the background map.
+
 ``plot_fovs_with_background()`` uses the lower-level methods of the ``FileMetadata`` and ``Catalog`` classes to compute and plot the FOVs. Advanced users can produce custom FOV plots using these methods and their options.

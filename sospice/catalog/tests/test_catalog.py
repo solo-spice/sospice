@@ -1,14 +1,22 @@
 import pytest
 from datetime import datetime
 import pandas as pd
-
+from pathlib import Path
+import shutil
+from parfive import Downloader
 
 from ..catalog import Catalog
+from .test_release import release2  # noqa: F401
 
 
 @pytest.fixture
 def catalog2():
     return Catalog(release_tag="2.0")
+
+
+@pytest.fixture
+def filename():
+    return "solo_L2_spice-n-exp_20220305T072522_V01_100663707-014.fits"
 
 
 @pytest.fixture
@@ -24,6 +32,11 @@ def catalog_latest():
 @pytest.fixture
 def catalog_empty():
     return Catalog()
+
+
+@pytest.fixture
+def max_download():
+    return 2
 
 
 @pytest.fixture
@@ -179,7 +192,7 @@ class TestCatalog:
         )
         assert (
             abs(
-                cat.mid_time(method="mean") - pd.Timestamp("2022-04-12 08:27:16")
+                cat.mid_time(method="mean") - pd.Timestamp("2022-04-12 08:26:46")
             ).total_seconds()
             < 1  # noqa: W503
         )
@@ -189,3 +202,34 @@ class TestCatalog:
             ).total_seconds()
             < 1  # noqa: W503
         )
+
+    def test_download_files(
+        self, release2, catalog2, max_download, filename  # noqa: F811
+    ):
+        base_dir = Path("./local/test_download_file")
+        if base_dir.exists():
+            shutil.rmtree(base_dir)
+        result = catalog2.download_files(
+            base_dir, release=release2, max_download=max_download, keep_tree=False
+        )
+        assert len(result) == max_download
+
+        if len(result) > 0:
+            expected_first_file_path = (base_dir / result[0].split("/")[-1]).as_posix()
+            assert result[0] == expected_first_file_path
+
+        downloader = Downloader(overwrite=False)
+        catalog2.download_files(
+            base_dir, release=release2, max_download=1, downloader=downloader
+        )
+        assert downloader.queued_downloads == 1
+
+        downloader = Downloader(overwrite=False)
+        catalog2.download_files(
+            base_dir, release=release2, max_download=2000, downloader=downloader
+        )
+        assert downloader.queued_downloads == 2000
+
+        downloader = Downloader(overwrite=False)
+        catalog2.download_files(base_dir, release=release2, downloader=downloader)
+        assert downloader.queued_downloads > 10

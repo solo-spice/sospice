@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from pathlib import Path
 from itertools import cycle
-
 import matplotlib.colors as mcolors
 import pandas as pd
 import numpy as np
+import warnings
 
+from parfive import Downloader
 from astropy.utils.data import download_file
 
 from .release import Release
@@ -276,7 +277,7 @@ class Catalog(pd.DataFrame):
 
             * "midrange" (default): middle of time range, from beginning of first observation to end of last observation
             * "mean": mean of observation times (not weighted by observations durations)
-
+            * "barycenter": barycenter of the middle times of all observations (weighted by observations durations)
         """
         if method is None or method == "midrange":
             begin_min = self["DATE-BEG"].min()
@@ -286,8 +287,8 @@ class Catalog(pd.DataFrame):
             return begin_min + (end_max - begin_min) / 2
         elif method == "mean":
             begin_mean = self["DATE-BEG"].mean()
-            telapse_mean = pd.Timedelta(seconds=self.TELAPSE.mean())
-            return begin_mean + telapse_mean
+            telapse_half_mean = pd.Timedelta(seconds=self.TELAPSE.mean() / 2)
+            return begin_mean + telapse_half_mean
         elif method == "barycenter":
             mid_observation = self["DATE-BEG"] + self.apply(
                 lambda row: pd.Timedelta(seconds=row.TELAPSE / 2), axis=1
@@ -336,18 +337,25 @@ class Catalog(pd.DataFrame):
         ----------
         ax: matplotlib.axes.Axes
             Axes (with relevant projection)
-        color: str or list
-            Color(s) cycle for drawing the FOVs
         kwargs: dict
-            Keyword arguments, passed to FileMetadata.plot_fov()
+            Keyword arguments, passed to FileMetadata.plot_fov(), except:
+            * color: str or list
+              Color(s) cycle for drawing the FOVs (one color per type of study)
+            * merge_by_spiobsid: bool
+              Merge FOV plots by SPIOBSID, drawing the first FOV of the observations of each SPIOBSID
+              with a plain line and the last FOV with a dashed line
         """
         time_range_length = self["DATE-BEG"].max() - self["DATE-BEG"].min()
-        if time_range_length > pd.Timedelta(days=60):
+        n_fovs = len(self)
+        if (time_range_length > pd.Timedelta(days=60)) or (n_fovs > 1000):
             print(
-                f"Time range length is {time_range_length}, this is long, and probably not what you want; aborting"
+                f"Time range length is {time_range_length} and number of observations is {n_fovs}, "
+                "this is a lot and probably not what you want; aborting"
             )
             return
-        merge_by_spiobsid = True
+        fovs = self.sort_values(by=["DATE"])
+        merge_by_spiobsid = kwargs.pop("merge_by_spiobsid", True)
+        assert type(merge_by_spiobsid) is bool
         if merge_by_spiobsid:
             groups = self.groupby("SPIOBSID")
             fovs = groups.first()
@@ -356,21 +364,20 @@ class Catalog(pd.DataFrame):
             fovs.reset_index(inplace=True)
         else:
             fovs = Catalog(data_frame=self[list(required_columns)])
-        # label at the position of the plot
-        fovs["fov_text"] = fovs.apply(Catalog._format_time_range, axis=1)
-        # label at the level of the plot (will be de-duplicated afterwards)
+
+        # label at the position of the FOV plot
+        fovs["fov_contour_label"] = fovs.apply(Catalog._format_time_range, axis=1)
+        # label at the level of the plot legend (will be de-duplicated afterwards)
         fovs["fov_label"] = fovs.apply(
             lambda row: f"{row.STUDY} ({row.MISOSTUD})", axis=1
         )
-        # color(s)
+        # color(s) for the different study types
         color = kwargs.pop("color", None)
         studies = sorted(list(self.STUDY.unique()))
         colors = (
             mcolors.TABLEAU_COLORS
             if color is None
-            else color
-            if type(color) is list
-            else [color]
+            else color if type(color) is list else [color]
         )
         study_color = dict(zip(studies, cycle(colors)))
         fovs["fov_color"] = fovs.apply(lambda row: study_color[row.STUDY], axis=1)
@@ -394,3 +401,62 @@ class Catalog(pd.DataFrame):
         unique_indices = [labels.index(x) for x in sorted(set(labels))]
         handles = list(np.array(handles)[unique_indices])
         ax.legend(handles=handles)
+
+    def download_files(
+        self,
+        base_dir=".",
+        base_url=None,
+        release=None,
+        keep_tree=True,
+        downloader=None,
+        max_download=None,
+    ):
+        """
+        Download all files from Catalog.,
+
+        Parameters
+        ----------
+        base_dir: Path or str
+            Base directory to download file to
+        base_url: str
+            Base URL for file
+        release: Release or str
+            Release to download file from
+        keep_tree: bool
+            Keep tree directory structure (by level and date)
+        downloader: parfive.Downloader
+            If provided, enqueue file for download instead of downloading it.
+            To download enqueued files, run `downloader.download()`
+        max_download: int
+            Maximum number of files to be downloaded.
+
+        Return
+        ------
+        parfive.Result
+            Download result (or None if file has only been enqueued)
+        """
+        default_max_download = 1000
+        if max_download is None:
+            max_download = default_max_download
+        elif max_download > default_max_download:
+            warnings.warn(
+                "You are overriding the default max_download: This might cause performance issues."
+            )
+        do_download = False
+        if downloader is None:
+            downloader = Downloader(overwrite=False)
+            do_download = True
+        self.iloc[:max_download].apply(
+            lambda row: FileMetadata(row).download_file(
+                base_dir=base_dir,
+                base_url=base_url,
+                release=release,
+                keep_tree=keep_tree,
+                downloader=downloader,
+            ),
+            axis=1,
+        )
+        if do_download:
+            result = downloader.download()
+            return result
+        return
