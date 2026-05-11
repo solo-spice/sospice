@@ -161,6 +161,14 @@ class TestCatalog:
         result = catalog2.find_file_closest_to_date(None)
         assert result.empty
 
+    def test_find_file_by_wavelength(self, catalog3):
+        result = catalog3.find_files_by_wavelength(wavelength="70.8")
+        assert len(result) == 23371
+        result = catalog3.find_files_by_wavelength("70.8")
+        assert len(result) == 23371
+        result = catalog3.find_files_by_wavelength(70.8)
+        assert len(result) == 23371
+
     def test_find_files(self, catalog2):
         result = Catalog().find_files()
         assert result.empty
