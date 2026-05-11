@@ -169,3 +169,7 @@ sospice/_version.py
 
 # Local files
 local/
+
+# vscode
+launch.json
+settings.json
