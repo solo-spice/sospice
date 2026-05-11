@@ -440,18 +440,12 @@ class FileMetadata:
                 kwargs[key] = self.metadata[index]
         ax.plot_coord(fov_coords, **kwargs)
 
-        if "fov_textlabel" in self.metadata.index:
-            text_args = [fov_coords[0], self.metadata.fov_textlabel]
-            # text_kwargs = {"rotation": "vertical", "ha": "right"}
-            text_kwargs = {"rotation": 0, "ha": "right", "fontsize": 25}
+        if "fov_contour_label" in self.metadata.index:
+            text_args = [fov_coords[0], self.metadata.fov_contour_label]
+            text_kwargs = {"rotation": "vertical", "ha": "right"}
+            # text_kwargs = {"rotation": 0, "ha": "right", "fontsize": 25}
             # text_kwargs = {"rotation": 0, "ha": "right"}
 
             if "fov_color" in self.metadata.index:
                 text_kwargs["color"] = self.metadata.fov_color
-            if "text_coord" in dir(ax):  # astropy ≥ 6
-                ax.text_coord(*text_args, **text_kwargs)
-            else:  # astropy < 6; to be deprecated at some point
-                text_args, text_kwargs = ax._transform_plot_args(
-                    *text_args, **text_kwargs
-                )
-                ax.text(*text_args, **text_kwargs)
+            ax.text_coord(*text_args, **text_kwargs)
