@@ -14,7 +14,7 @@ sospice: Python data analysis tools for Solar Orbiter/SPICE
 .. |CI| image:: https://github.com/solo-spice/sospice/actions/workflows/python-package.yml/badge.svg?branch=main
    :target: https://github.com/solo-spice/sospice/actions/workflows/python-package.yml
 
-`SPICE <https://spice.ias.u-psud.fr/>`__ is an extreme-UV imaging
+`SPICE <https://spice.osups.universite-paris-saclay.fr/>`__ is an extreme-UV imaging
 spectrometer on board the `Solar
 Orbiter <http://sci.esa.int/solar-orbiter/>`__ mission.
 A generic SPICE data analysis user’s manual (including Python and IDL

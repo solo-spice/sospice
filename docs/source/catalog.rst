@@ -4,7 +4,7 @@ Catalogs and releases
 SPICE data release management
 -----------------------------
 
-SPICE data files are part of `data releases <https://spice.ias.u-psud.fr/spice-data/>`__. Released files are sent to the `Solar Orbiter Archive <http://soar.esac.esa.int/>`__, but these files can have several successive versions; a data release allows freezing the versions of different released files, and then makes it easy to reference file versions used for a specific analysis (using the release DOI).
+SPICE data files are part of `data releases <https://spice.osups.universite-paris-saclay.fr/spice-data/>`__. Released files are sent to the `Solar Orbiter Archive <http://soar.esac.esa.int/>`__, but these files can have several successive versions; a data release allows freezing the versions of different released files, and then makes it easy to reference file versions used for a specific analysis (using the release DOI).
 
 The ``Release`` module of ``sospice`` helps access these releases and the file catalogs associated to them.
 The associated functions are mostly meant to be used as back-end for the ``Catalog`` module, it is unlikely that you would like to use them directly.

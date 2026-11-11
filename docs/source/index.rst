@@ -6,7 +6,7 @@
 sospice documentation
 =====================
 
-`SPICE <https://spice.ias.u-psud.fr/>`__ is an extreme-UV imaging
+`SPICE <https://spice.osups.universite-paris-saclay.fr/>`__ is an extreme-UV imaging
 spectrometer on board the `Solar
 Orbiter <http://sci.esa.int/solar-orbiter/>`__ mission.
 A generic SPICE data analysis user’s manual (including Python and IDL
