@@ -5,6 +5,8 @@ import matplotlib.colors as mcolors
 import pandas as pd
 import numpy as np
 import warnings
+import astropy.units as u
+
 
 from parfive import Downloader
 from astropy.utils.data import download_file
@@ -217,9 +219,34 @@ class Catalog(pd.DataFrame):
         index = df.index.get_indexer([date], method="nearest")
         df.reset_index(inplace=True)
         return df.iloc[index[0]]
+    
+    def find_files_by_wavelength(self, wavelength):
+        """
+        Find files by wavelength included in observed wavelength ranges.
+
+        Parameters
+        ----------
+        wavelength:
+            Wavelength that must be included in the file wavelength's range
+
+        Return
+        ------
+        Catalog
+            Matching files
+        """
+        if self.empty:
+            return self
+        df = self
+        if wavelength is not None:
+
+            wavelength =  float(wavelength) * u.nm
+            contains_wl = df.apply(lambda row: wavelength in FileMetadata(row).get_wavelengths(), axis=1)
+            df = df[contains_wl]
+
+        return Catalog(data_frame=df)
 
     def find_files(
-        self, query=None, date_min=None, date_max=None, closest_to_date=None, **kwargs
+        self, query=None, date_min=None, date_max=None, closest_to_date=None, wavelength=None, **kwargs
     ):
         """
         Find files according to different criteria on metadata.
@@ -258,12 +285,15 @@ class Catalog(pd.DataFrame):
         if query is not None:
             df = Catalog(data_frame=df.query(query))
         df = df.find_files_by_date_range(date_min, date_max)
+        if wavelength is not None:
+            df = df.find_files_by_wavelength(wavelength)
         if closest_to_date is not None:
             df = (
                 df.find_file_closest_to_date(closest_to_date, level=kwargs["LEVEL"])
                 .to_frame()
                 .T
             )
+        
         return df
 
     def mid_time(self, method=None):
